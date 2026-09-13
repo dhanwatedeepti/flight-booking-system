@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+
+{% block title %}Boarding Pass & E-Ticket: {{ booking.pnr }} | SkyWings{% endblock %}
+
+{% block content %}
+<div class="ticket-wrapper">
+
+    <!-- Top Confirmation Banner (Hidden in Print) -->
+    <div class="btn-no-print" style="text-align: center; margin-bottom: 24px;">
+        <div style="display: inline-flex; align-items: center; justify-content: center; width: 60px; height: 60px; background: #ecfdf5; color: #059669; border-radius: 50%; font-size: 2rem; margin-bottom: 12px; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);">
+            ✓
+        </div>
+        <h1 style="font-size: 1.8rem; font-weight: 800; color: #0f172a;">Booking Confirmed!</h1>
+        <p style="color: #64748b; font-size: 0.95rem; margin-top: 4px;">
+            Your e-ticket has been generated. Confirmation sent to <b>{{ booking.passenger_email }}</b>.
+        </p>
+
+        <!-- Action Toolbar -->
+        <div style="display: flex; justify-content: center; gap: 12px; margin-top: 20px; flex-wrap: wrap;">
+            <button onclick="window.print()" class="btn btn-primary">
+                🖨️ Print / Save as PDF
+            </button>
+            <a href="{{ url_for('my_bookings') }}" class="btn btn-outline">
+                📋 View in My Bookings
+            </a>
+            <a href="{{ url_for('index') }}" class="btn btn-outline">
+                ✈️ Book Another Flight
+            </a>
+        </div>
+    </div>
+
+    <!-- Authentic Boarding Pass Component -->
+    <div class="boarding-pass">
+
+        <!-- Main Ticket Body -->
+        <div class="ticket-main">
+            <!-- Header -->
+            <div class="ticket-header">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span style="font-size: 1.6rem; color: var(--primary);">✈</span>
+                    <div>
+                        <div style="font-size: 1.2rem; font-weight: 800; color: #0f172a;">{{ booking.airline }}</div>
+                        <div style="font-size: 0.75rem; color: #64748b; font-family: monospace;">FLIGHT {{ booking.flight_number }} • {{ booking.aircraft }}</div>
+                    </div>
+                </div>
+
+                <div style="text-align: right;">
+                    <div style="font-size: 0.7rem; color: #64748b; font-weight: 600;">BOOKING REF (PNR)</div>
+                    <div class="ticket-pnr-badge">{{ booking.pnr }}</div>
+                </div>
+            </div>
+
+            <!-- Route Banner -->
+            <div class="ticket-flight-route">
+                <div>
+                    <div class="ticket-airport-code">{{ booking.origin_code }}</div>
+                    <div style="font-weight: 600; font-size: 0.95rem; color: #1e3a8a;">{{ booking.origin_city }}</div>
+                    <div style="font-size: 1.2rem; font-weight: 800; color: #0f172a; margin-top: 6px;">{{ booking.departure_time }}</div>
+                </div>
+
+                <div style="text-align: center;">
+                    <div style="font-size: 0.8rem; font-weight: 600; color: #64748b;">{{ booking.duration }}</div>
+                    <div style="color: var(--primary); font-size: 1.2rem; margin: 2px 0;">✈ ➔</div>
+                    <span class="badge-pill" style="background: #ecfdf5; color: #065f46; font-weight: 600;">Confirmed</span>
+                </div>
+
+                <div style="text-align: right;">
+                    <div class="ticket-airport-code">{{ booking.destination_code }}</div>
+                    <div style="font-weight: 600; font-size: 0.95rem; color: #1e3a8a;">{{ booking.destination_city }}</div>
+                    <div style="font-size: 1.2rem; font-weight: 800; color: #0f172a; margin-top: 6px;">{{ booking.arrival_time }}</div>
+                </div>
+            </div>
+
+            <!-- Ticket Details Grid -->
+            <div class="ticket-details-grid">
+                <div>
+                    <div class="ticket-field-label">Passenger Name</div>
+                    <div class="ticket-field-val">{{ booking.passenger_name }}</div>
+                </div>
+
+                <div>
+                    <div class="ticket-field-label">Date</div>
+                    <div class="ticket-field-val">{{ booking.travel_date }}</div>
+                </div>
+
+                <div>
+                    <div class="ticket-field-label">Terminal</div>
+                    <div class="ticket-field-val" style="color: var(--primary);">{{ booking.terminal }}</div>
+                </div>
+
+                <div>
+                    <div class="ticket-field-label">Gate</div>
+                    <div class="ticket-field-val" style="color: var(--primary);">{{ booking.gate }}</div>
+                </div>
+
+                <div>
+                    <div class="ticket-field-label">Seat(s)</div>
+                    <div class="ticket-field-val" style="color: var(--accent);">{{ booking.seat_numbers or 'AUTO' }}</div>
+                </div>
+
+                <div>
+                    <div class="ticket-field-label">Cabin Class</div>
+                    <div class="ticket-field-val">{{ booking.cabin_class }}</div>
+                </div>
+
+                <div>
+                    <div class="ticket-field-label">Baggage</div>
+                    <div class="ticket-field-val">{{ booking.baggage_checkin }} + 7kg</div>
+                </div>
+
+                <div>
+                    <div class="ticket-field-label">Payment Status</div>
+                    <div class="ticket-field-val" style="color: #059669; font-size: 0.95rem;">PAID (₹{{ "{:,}".format(booking.total_price | round | int) }})</div>
+                </div>
+            </div>
+
+            <!-- Barcode Graphic -->
+            <div class="barcode"></div>
+            <div style="text-align: center; font-size: 0.65rem; color: #64748b; font-family: monospace; margin-top: 4px; letter-spacing: 0.2em;">
+                *{{ booking.pnr }}-{{ booking.flight_number }}-{{ booking.travel_date }}*
+            </div>
+        </div>
+
+        <!-- Perforated Ticket Stub -->
+        <div class="ticket-stub">
+            <div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                    <span style="font-weight: 800; font-size: 0.95rem; color: var(--primary-dark);">BOARDING PASS</span>
+                    <span style="font-size: 0.8rem; font-family: monospace; font-weight: 700;">{{ booking.airline_code }}</span>
+                </div>
+
+                <div style="margin-bottom: 12px;">
+                    <div class="ticket-field-label">Passenger</div>
+                    <div style="font-weight: 700; font-size: 0.9rem; color: #0f172a;">{{ booking.passenger_name }}</div>
+                </div>
+
+                <div style="margin-bottom: 12px;">
+                    <div class="ticket-field-label">Flight / Date</div>
+                    <div style="font-weight: 700; font-size: 0.85rem; font-family: monospace;">{{ booking.flight_number }} • {{ booking.travel_date }}</div>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                    <div>
+                        <div class="ticket-field-label">Seat</div>
+                        <div style="font-size: 1.2rem; font-weight: 800; color: var(--primary);">{{ booking.seat_numbers or 'AUTO' }}</div>
+                    </div>
+                    <div>
+                        <div class="ticket-field-label">Gate</div>
+                        <div style="font-size: 1.2rem; font-weight: 800; color: var(--primary);">{{ booking.gate }}</div>
+                    </div>
+                </div>
+
+                <div style="background: #eff6ff; padding: 10px; border-radius: 6px; text-align: center; margin-bottom: 14px;">
+                    <div style="font-size: 0.65rem; color: #1e40af; font-weight: 700; text-transform: uppercase;">Gate Closes</div>
+                    <div style="font-size: 1rem; font-weight: 800; color: #1e3a8a;">20 Mins Prior</div>
+                </div>
+            </div>
+
+            <!-- Stub QR Code -->
+            <div style="text-align: center;">
+                <svg width="80" height="80" viewBox="0 0 100 100" fill="#0f172a" style="margin: 0 auto; display: block;">
+                    <path d="M10 10h30v30h-30zM50 10h10v10h-10zM70 10h20v20h-20zM80 30h10v10h-10zM10 50h10v10h-10zM30 50h10v20h-10zM10 70h30v20h-30zM50 50h20v10h-20zM80 50h10v30h-10zM60 70h10v20h-10zM50 90h20v-10h-20zM15 15h20v20h-20zM75 15h10v10h-10zM15 75h20v10h-20z" />
+                </svg>
+                <div style="font-size: 0.65rem; font-family: monospace; color: #64748b; margin-top: 4px;">{{ booking.pnr }}</div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Instructions & Baggage Guide (Hidden in Print) -->
+    <div class="btn-no-print" style="margin-top: 32px; background: white; border-radius: 12px; border: 1px solid #e2e8f0; padding: 24px;">
+        <h3 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 12px;">Important Travel Guidelines</h3>
+        <ul style="color: #64748b; font-size: 0.85rem; line-height: 1.7; padding-left: 20px;">
+            <li>Please reach the airport at least <b>2 hours</b> prior for domestic flights and <b>3 hours</b> for international flights.</li>
+            <li>Carry a valid government-issued photo identity card along with this boarding pass.</li>
+            <li>Free check-in baggage allowance: <b>{{ booking.baggage_checkin }}</b>. Hand baggage: <b>{{ booking.baggage_cabin }}</b>.</li>
+            <li>For gate changes or real-time flight status, check airport flight information display monitors.</li>
+        </ul>
+    </div>
+
+</div>
+{% endblock %}

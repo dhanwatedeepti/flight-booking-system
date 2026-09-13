@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Flight Results</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h2>Flights from {{ from_city }} to {{ to_city }}</h2>
+    {% if results %}
+        <ul>
+            {% for flight in results %}
+                <li>
+                    Flight {{ flight.id }} - ₹{{ flight.price }}
+                    <a href="{{ url_for('book', flight_id=flight.id) }}">Book Now</a>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No flights found.</p>
+    {% endif %}
+</body>
+</html>

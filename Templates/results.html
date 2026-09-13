@@ -1,0 +1,242 @@
+{% extends "base.html" %}
+
+{% block title %}Flights from {{ from_city }} to {{ to_city }} | SkyWings{% endblock %}
+
+{% block content %}
+<div class="results-page">
+    <div class="container">
+
+        <!-- Results Header Summary Bar -->
+        <div class="results-header-summary">
+            <div class="route-info">
+                <h2>
+                    <span>🛫 {{ from_city }}</span> 
+                    <span style="color: #64748b; font-size: 1.1rem;">➔</span> 
+                    <span>🛬 {{ to_city }}</span>
+                </h2>
+                <div class="route-meta">
+                    <span>📅 Travel Date: <b>{{ travel_date }}</b></span> • 
+                    <span>👥 <b>{{ passengers }}</b> Passenger(s)</span> • 
+                    <span>💺 <b>{{ cabin_class }}</b></span> • 
+                    <span>Found <b>{{ results|length }}</b> Flights</span>
+                </div>
+            </div>
+
+            <a href="{{ url_for('index') }}" class="btn btn-outline btn-sm">
+                ✏ Modify Search
+            </a>
+        </div>
+
+        {% if results %}
+        <div class="results-grid">
+
+            <!-- Filters Sidebar -->
+            <aside class="filter-card">
+                <div class="filter-header">
+                    <span class="filter-title">Filters</span>
+                    <button type="button" id="reset_filters_btn" class="filter-reset">Reset All</button>
+                </div>
+
+                <!-- Stops Filter -->
+                <div class="filter-section">
+                    <div class="filter-heading">Stops</div>
+                    <label class="filter-option">
+                        <input type="checkbox" class="filter-stop" value="0">
+                        <span>Non-stop</span>
+                    </label>
+                    <label class="filter-option">
+                        <input type="checkbox" class="filter-stop" value="1">
+                        <span>1 Stop</span>
+                    </label>
+                </div>
+
+                <!-- Departure Time Filter -->
+                <div class="filter-section">
+                    <div class="filter-heading">Departure Time</div>
+                    <div class="time-slot-grid">
+                        <button type="button" class="time-btn" data-slot="early_morning">
+                            <span class="time-btn-icon">🌙</span>
+                            <span>Before 6 AM</span>
+                        </button>
+                        <button type="button" class="time-btn" data-slot="morning">
+                            <span class="time-btn-icon">🌅</span>
+                            <span>6 AM - 12 PM</span>
+                        </button>
+                        <button type="button" class="time-btn" data-slot="afternoon">
+                            <span class="time-btn-icon">☀️</span>
+                            <span>12 PM - 6 PM</span>
+                        </button>
+                        <button type="button" class="time-btn" data-slot="evening">
+                            <span class="time-btn-icon">🌆</span>
+                            <span>After 6 PM</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Airlines Filter -->
+                <div class="filter-section">
+                    <div class="filter-heading">Airlines</div>
+                    {% set unique_airlines = [] %}
+                    {% for flight in results %}
+                        {% if flight.airline not in unique_airlines %}
+                            {% set _ = unique_airlines.append(flight.airline) %}
+                            <label class="filter-option">
+                                <input type="checkbox" class="filter-airline" value="{{ flight.airline }}">
+                                <span>{{ flight.airline }}</span>
+                            </label>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+
+                <!-- Price Slider -->
+                <div class="filter-section">
+                    <div class="filter-heading">Max Price</div>
+                    {% set max_flight_price = results | map(attribute='price') | max %}
+                    {% set min_flight_price = results | map(attribute='price') | min %}
+                    <input type="range" id="price_filter_slider" min="{{ min_flight_price }}" max="{{ max_flight_price }}" value="{{ max_flight_price }}" style="width: 100%; accent-color: var(--primary);">
+                    <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: #64748b; margin-top: 6px;">
+                        <span>₹{{ "{:,}".format(min_flight_price) }}</span>
+                        <span id="price_filter_display" style="font-weight: 700; color: var(--primary-dark);">₹{{ "{:,}".format(max_flight_price) }}</span>
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Flight Results Column -->
+            <div class="results-main">
+
+                <!-- Sorting Controls -->
+                <div class="sort-controls">
+                    <span class="sort-label">Sort by:</span>
+                    <div class="sort-tabs">
+                        <button type="button" class="sort-tab active" data-sort="cheapest">Cheapest First</button>
+                        <button type="button" class="sort-tab" data-sort="fastest">Fastest Duration</button>
+                        <button type="button" class="sort-tab" data-sort="earliest">Earliest Departure</button>
+                    </div>
+                </div>
+
+                <!-- Flights Container -->
+                <div id="flight_results_container">
+                    {% for flight in results %}
+                        {% set logo_color = '#0033a0' if 'IndiGo' in flight.airline else ('#ed1b24' if 'Air India' in flight.airline else ('#580f48' if 'Vistara' in flight.airline else ('#ff5722' if 'Akasa' in flight.airline else ('#e63946' if 'SpiceJet' in flight.airline else '#d71921')))) %}
+                        <div class="flight-card" 
+                             data-price="{{ flight.price }}" 
+                             data-duration="{{ flight.duration_minutes }}" 
+                             data-stops="{{ flight.stops }}" 
+                             data-airline="{{ flight.airline }}" 
+                             data-departure="{{ flight.departure_time }}">
+                            
+                            <div class="flight-card-inner">
+                                <!-- Airline Info -->
+                                <div class="airline-badge">
+                                    <div class="airline-logo-box" style="background-color: {{ logo_color }};">
+                                        {{ flight.airline_code }}
+                                    </div>
+                                    <div class="airline-details">
+                                        <span class="airline-name">{{ flight.airline }}</span>
+                                        <span class="flight-code">{{ flight.flight_number }}</span>
+                                        <span style="font-size: 0.75rem; color: #64748b;">{{ flight.aircraft }}</span>
+                                    </div>
+                                </div>
+
+                                <!-- Schedule & Route Timeline -->
+                                <div class="flight-schedule">
+                                    <div class="schedule-block">
+                                        <div class="time">{{ flight.departure_time }}</div>
+                                        <div class="city-code">{{ flight.origin_code }}</div>
+                                        <div style="font-size: 0.75rem; color: #64748b;">{{ flight.origin_city }}</div>
+                                    </div>
+
+                                    <div class="flight-duration-line">
+                                        <span class="duration-text">{{ flight.duration }}</span>
+                                        <div class="route-line">
+                                            <span class="route-plane">✈</span>
+                                        </div>
+                                        {% if flight.stops == 0 %}
+                                            <span class="stops-badge">Non-stop</span>
+                                        {% else %}
+                                            <span class="stops-badge has-stops">{{ flight.layover }}</span>
+                                        {% endif %}
+                                    </div>
+
+                                    <div class="schedule-block">
+                                        <div class="time">{{ flight.arrival_time }}</div>
+                                        <div class="city-code">{{ flight.destination_code }}</div>
+                                        <div style="font-size: 0.75rem; color: #64748b;">{{ flight.destination_city }}</div>
+                                    </div>
+                                </div>
+
+                                <!-- Price & Action -->
+                                <div class="flight-price-action">
+                                    <div>
+                                        <div class="price-tag">₹{{ "{:,}".format(flight.price) }}</div>
+                                        <div class="per-passenger">per adult traveler</div>
+                                    </div>
+                                    <a href="{{ url_for('book', flight_id=flight.id) }}?date={{ travel_date }}&passengers={{ passengers }}&cabin_class={{ cabin_class }}" 
+                                       class="btn btn-primary" style="width: 100%;">
+                                        Book Now ➔
+                                    </a>
+                                </div>
+                            </div>
+
+                            <!-- Card Footer with Baggage, Cancellation & Details -->
+                            <div class="flight-card-footer">
+                                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                                    <span class="badge-pill">🧳 Cabin: {{ flight.baggage_cabin }}</span>
+                                    <span class="badge-pill">📦 Check-in: {{ flight.baggage_checkin }}</span>
+                                    <span class="badge-pill" style="color: #059669; background: #ecfdf5;">✓ Refundable Option Available</span>
+                                    {% if flight.available_seats < 30 %}
+                                        <span class="badge-pill" style="color: #dc2626; background: #fef2f2;">⚡ Only {{ flight.available_seats }} seats left</span>
+                                    {% endif %}
+                                </div>
+
+                                <button type="button" onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'block' ? 'none' : 'block'" 
+                                        style="background:none; border:none; color: var(--primary); font-size: 0.8rem; font-weight: 600; cursor: pointer;">
+                                    Fare Details & Amenities ▾
+                                </button>
+                                <div style="display: none; width: 100%; margin-top: 12px; padding: 14px; background: #f8fafc; border-radius: 8px; font-size: 0.85rem; border: 1px solid #e2e8f0;">
+                                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px;">
+                                        <div><b>In-Flight Amenities:</b> USB Charging, In-seat Recline, Free Water</div>
+                                        <div><b>Baggage Allowance:</b> Cabin 7kg + Check-in {{ flight.baggage_checkin }} included</div>
+                                        <div><b>Date Change:</b> Permitted up to 2 hours before departure</div>
+                                        <div><b>Aircraft Type:</b> {{ flight.aircraft }} (Twin-engine jet)</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <!-- No Results Warning (Client Side Filters) -->
+                <div id="no_filter_results" style="display: none; background: white; border-radius: 12px; padding: 40px; text-align: center; border: 1px solid #e2e8f0;">
+                    <div style="font-size: 3rem; margin-bottom: 12px;">🔍</div>
+                    <h3 style="font-size: 1.3rem; font-weight: 700;">No flights match your filter selection</h3>
+                    <p style="color: #64748b; margin-bottom: 16px;">Try adjusting your stop, airline, or price filters to see more flights.</p>
+                    <button type="button" class="btn btn-outline" onclick="document.getElementById('reset_filters_btn').click()">Reset Filters</button>
+                </div>
+
+            </div>
+        </div>
+
+        {% else %}
+        <!-- No Flights Found from Search -->
+        <div style="background: white; border-radius: 16px; padding: 60px 20px; text-align: center; border: 1px solid #e2e8f0; max-width: 650px; margin: 40px auto;">
+            <div style="font-size: 3.5rem; margin-bottom: 16px;">🛫</div>
+            <h2 style="font-size: 1.6rem; font-weight: 800; color: #0f172a; margin-bottom: 12px;">No Flights Found for this Route</h2>
+            <p style="color: #64748b; margin-bottom: 24px; line-height: 1.6;">
+                We couldn't find direct scheduled flights between <b>{{ from_city }}</b> and <b>{{ to_city }}</b> on this date.
+                Popular routes with frequent daily flights include:
+            </p>
+            <div style="display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; margin-bottom: 28px;">
+                <a href="{{ url_for('search') }}?from=Pune&to=Delhi" class="btn btn-outline btn-sm">Pune → Delhi</a>
+                <a href="{{ url_for('search') }}?from=Mumbai&to=Bangalore" class="btn btn-outline btn-sm">Mumbai → Bangalore</a>
+                <a href="{{ url_for('search') }}?from=Bangalore&to=Goa" class="btn btn-outline btn-sm">Bangalore → Goa</a>
+                <a href="{{ url_for('search') }}?from=Mumbai&to=Delhi" class="btn btn-outline btn-sm">Mumbai → Delhi</a>
+            </div>
+            <a href="{{ url_for('index') }}" class="btn btn-primary">Search Other Routes ➔</a>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+{% endblock %}

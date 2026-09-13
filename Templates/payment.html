@@ -1,0 +1,237 @@
+{% extends "base.html" %}
+
+{% block title %}Complete Payment for Flight: {{ booking.pnr }} | SkyWings{% endblock %}
+
+{% block content %}
+<div style="padding: 32px 0 60px;">
+    <div class="container">
+
+        <!-- Stepper Progress Bar -->
+        <div class="stepper">
+            <div class="step-item completed">
+                <div class="step-circle">✓</div>
+                <span class="step-label">Flight Selected</span>
+            </div>
+            <div class="step-item completed">
+                <div class="step-circle">✓</div>
+                <span class="step-label">Passenger & Seats</span>
+            </div>
+            <div class="step-item active">
+                <div class="step-circle">3</div>
+                <span class="step-label">Payment</span>
+            </div>
+            <div class="step-item">
+                <div class="step-circle">4</div>
+                <span class="step-label">Boarding Pass</span>
+            </div>
+        </div>
+
+        <div class="checkout-grid">
+
+            <!-- Left: Payment Options & Card Preview -->
+            <div class="checkout-left">
+                <div class="checkout-section">
+                    <h3 class="section-title">💳 Select Payment Method</h3>
+
+                    <!-- Payment Method Tabs -->
+                    <div class="payment-tabs">
+                        <button type="button" class="payment-tab-btn active" data-target="card_pane" data-method="Credit / Debit Card">
+                            💳 Credit / Debit Card
+                        </button>
+                        <button type="button" class="payment-tab-btn" data-target="upi_pane" data-method="UPI / QR Code">
+                            📱 UPI / QR Code
+                        </button>
+                        <button type="button" class="payment-tab-btn" data-target="netbanking_pane" data-method="Net Banking">
+                            🏦 Net Banking
+                        </button>
+                    </div>
+
+                    <form action="{{ url_for('process_payment', pnr=booking.pnr) }}" method="POST" id="payment_form">
+                        <input type="hidden" name="payment_method" id="payment_method_input" value="Credit / Debit Card">
+
+                        <!-- Pane 1: Credit / Debit Card -->
+                        <div id="card_pane" class="payment-pane">
+                            <!-- Interactive 3D Card Preview -->
+                            <div class="credit-card-preview">
+                                <div class="card-top">
+                                    <div class="card-chip"></div>
+                                    <span class="card-brand" id="card_preview_brand">VISA</span>
+                                </div>
+                                <div class="card-number-display" id="card_preview_number">
+                                    •••• •••• •••• ••••
+                                </div>
+                                <div class="card-bottom">
+                                    <div>
+                                        <div class="card-label">Card Holder</div>
+                                        <div class="card-val" id="card_preview_name">{{ booking.passenger_name }}</div>
+                                    </div>
+                                    <div>
+                                        <div class="card-label">Expires</div>
+                                        <div class="card-val" id="card_preview_exp">MM/YY</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Card Form Inputs -->
+                            <div style="display: flex; flex-direction: column; gap: 14px;">
+                                <div>
+                                    <label class="form-label" for="card_number_input">Card Number</label>
+                                    <input type="text" id="card_number_input" class="form-control" placeholder="4111 2222 3333 4444" maxlength="19" required style="padding-left: 12px; font-family: monospace;">
+                                </div>
+
+                                <div>
+                                    <label class="form-label" for="card_holder_input">Cardholder Name</label>
+                                    <input type="text" id="card_holder_input" class="form-control" placeholder="Name on card" value="{{ booking.passenger_name }}" required style="padding-left: 12px;">
+                                </div>
+
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+                                    <div>
+                                        <label class="form-label" for="card_exp_input">Expiry Date (MM/YY)</label>
+                                        <input type="text" id="card_exp_input" class="form-control" placeholder="12/28" maxlength="5" required style="padding-left: 12px; font-family: monospace;">
+                                    </div>
+                                    <div>
+                                        <label class="form-label" for="card_cvv_input">CVV / CVC</label>
+                                        <input type="password" id="card_cvv_input" class="form-control" placeholder="•••" maxlength="4" required style="padding-left: 12px; font-family: monospace;">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Pane 2: UPI / QR Code -->
+                        <div id="upi_pane" class="payment-pane" style="display: none;">
+                            <div class="upi-qr-box">
+                                <div class="qr-code-img">
+                                    <!-- Scalable SVG QR Code simulation -->
+                                    <svg width="150" height="150" viewBox="0 0 100 100" fill="#0f172a">
+                                        <path d="M10 10h30v30h-30zM50 10h10v10h-10zM70 10h20v20h-20zM80 30h10v10h-10zM10 50h10v10h-10zM30 50h10v20h-10zM10 70h30v20h-30zM50 50h20v10h-20zM80 50h10v30h-10zM60 70h10v20h-10zM50 90h20v-10h-20zM15 15h20v20h-20zM75 15h10v10h-10zM15 75h20v10h-20z" />
+                                        <circle cx="50" cy="50" r="8" fill="#2563eb" />
+                                    </svg>
+                                </div>
+                                <div style="font-weight: 700; margin-bottom: 4px;">Scan with any UPI App</div>
+                                <div style="font-size: 0.8rem; color: #64748b;">Google Pay, PhonePe, Paytm, BHIM, Cred</div>
+                            </div>
+
+                            <div style="margin-top: 16px;">
+                                <label class="form-label">Or Pay with UPI VPA ID</label>
+                                <div style="display: flex; gap: 10px;">
+                                    <input type="text" class="form-control" placeholder="e.g. yourname@okhdfcbank" style="padding-left: 12px;">
+                                    <button type="button" class="btn btn-outline btn-sm" onclick="alert('UPI ID Verified!')">Verify</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Pane 3: Net Banking -->
+                        <div id="netbanking_pane" class="payment-pane" style="display: none;">
+                            <label class="form-label" style="margin-bottom: 12px;">Popular Banks</label>
+                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px;">
+                                <label style="border: 1px solid #cbd5e1; border-radius: 8px; padding: 12px; text-align: center; cursor: pointer; background: white;">
+                                    <input type="radio" name="bank" value="HDFC" checked style="accent-color: var(--primary);">
+                                    <div style="font-weight: 700; font-size: 0.9rem; margin-top: 4px;">HDFC Bank</div>
+                                </label>
+                                <label style="border: 1px solid #cbd5e1; border-radius: 8px; padding: 12px; text-align: center; cursor: pointer; background: white;">
+                                    <input type="radio" name="bank" value="SBI" style="accent-color: var(--primary);">
+                                    <div style="font-weight: 700; font-size: 0.9rem; margin-top: 4px;">State Bank</div>
+                                </label>
+                                <label style="border: 1px solid #cbd5e1; border-radius: 8px; padding: 12px; text-align: center; cursor: pointer; background: white;">
+                                    <input type="radio" name="bank" value="ICICI" style="accent-color: var(--primary);">
+                                    <div style="font-weight: 700; font-size: 0.9rem; margin-top: 4px;">ICICI Bank</div>
+                                </label>
+                            </div>
+
+                            <div>
+                                <label class="form-label">All Other Banks</label>
+                                <select class="form-control" style="padding-left: 12px;">
+                                    <option>Axis Bank</option>
+                                    <option>Kotak Mahindra Bank</option>
+                                    <option>Punjab National Bank</option>
+                                    <option>Bank of Baroda</option>
+                                    <option>IndusInd Bank</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Security Assurances -->
+                        <div style="display: flex; gap: 16px; align-items: center; justify-content: center; margin-top: 24px; padding: 12px; background: #f8fafc; border-radius: 8px; font-size: 0.8rem; color: #64748b;">
+                            <span>🔒 256-Bit SSL Encrypted</span>
+                            <span>✓ RBI Compliant</span>
+                            <span>🛡️ Zero Fraud Liability</span>
+                        </div>
+
+                        <!-- Pay Button -->
+                        <button type="submit" id="pay_btn" class="btn btn-accent btn-lg" style="width: 100%; margin-top: 20px; font-size: 1.1rem; box-shadow: 0 4px 14px rgba(249, 115, 22, 0.35);">
+                            Pay ₹{{ "{:,}".format(booking.total_price | round | int) }} & Generate E-Ticket ➔
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Right: Order Summary -->
+            <div class="checkout-right">
+                <div class="summary-card">
+                    <h3 style="font-size: 1.15rem; font-weight: 800; margin-bottom: 16px; color: #0f172a;">Booking Summary</h3>
+
+                    <div style="background: #eff6ff; padding: 12px; border-radius: 8px; border: 1px solid #bfdbfe; margin-bottom: 16px;">
+                        <span style="font-size: 0.75rem; color: #1e40af; font-weight: 700;">BOOKING REFERENCE (PNR)</span>
+                        <div style="font-size: 1.25rem; font-weight: 800; font-family: monospace; color: var(--primary-dark);">
+                            {{ booking.pnr }}
+                        </div>
+                    </div>
+
+                    <div class="summary-flight-brief">
+                        <div>
+                            <div style="font-weight: 700;">{{ booking.origin_city }} ({{ booking.origin_code }}) ➔ {{ booking.destination_city }} ({{ booking.destination_code }})</div>
+                            <div style="font-size: 0.8rem; color: #64748b;">{{ booking.airline }} • Flight {{ booking.flight_number }}</div>
+                            <div style="font-size: 0.8rem; color: #64748b;">📅 {{ booking.travel_date }} at {{ booking.departure_time }}</div>
+                        </div>
+                    </div>
+
+                    <div class="summary-row">
+                        <span>Passenger Name</span>
+                        <span style="font-weight: 600; color: #0f172a;">{{ booking.passenger_name }}</span>
+                    </div>
+
+                    <div class="summary-row">
+                        <span>Seat Number(s)</span>
+                        <span style="font-weight: 700; color: var(--primary);">{{ booking.seat_numbers or 'Auto-assigned at Gate' }}</span>
+                    </div>
+
+                    <div class="summary-row">
+                        <span>Base Fare</span>
+                        <span>₹{{ "{:,}".format(booking.base_fare | round | int) }}</span>
+                    </div>
+
+                    <div class="summary-row">
+                        <span>Taxes & GST</span>
+                        <span>₹{{ "{:,}".format(booking.taxes | round | int) }}</span>
+                    </div>
+
+                    {% if booking.add_on_fee > 0 %}
+                    <div class="summary-row">
+                        <span>Add-ons (Meals/Seats/Baggage)</span>
+                        <span>₹{{ "{:,}".format(booking.add_on_fee | round | int) }}</span>
+                    </div>
+                    {% endif %}
+
+                    {% if booking.discount > 0 %}
+                    <div class="summary-row discount">
+                        <span>Coupon Discount</span>
+                        <span>-₹{{ "{:,}".format(booking.discount | round | int) }}</span>
+                    </div>
+                    {% endif %}
+
+                    <div class="summary-row total">
+                        <span>Total Payable</span>
+                        <span style="color: var(--primary-dark);">₹{{ "{:,}".format(booking.total_price | round | int) }}</span>
+                    </div>
+
+                    <p style="font-size: 0.75rem; color: #64748b; margin-top: 16px; text-align: center;">
+                        By confirming, you agree to SkyWings fare rules and airline passenger carriage regulations.
+                    </p>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+{% endblock %}

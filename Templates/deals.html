@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block title %}Exclusive Flight Offers & Coupons | SkyWings{% endblock %}
+
+{% block content %}
+<div style="padding: 40px 0 80px;">
+    <div class="container">
+
+        <div style="text-align: center; max-width: 680px; margin: 0 auto 40px;">
+            <span class="badge-pill" style="background: #fef3c7; color: #92400e; font-weight: 700;">FLIGHT PROMOS & DISCOUNTS</span>
+            <h1 style="font-size: 2.2rem; font-weight: 800; color: #0f172a; margin: 8px 0 12px;">Fly More, Spend Less</h1>
+            <p style="color: #64748b; font-size: 1rem; line-height: 1.6;">
+                Save big on your next journey with verified promotional codes. Apply these promo codes during checkout to unlock instant discounts.
+            </p>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 24px;">
+            
+            <!-- Deal 1 -->
+            <div style="background: white; border-radius: 16px; border: 1px solid #e2e8f0; padding: 24px; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; justify-content: space-between;">
+                <div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <span style="background: #2563eb; color: white; padding: 4px 10px; border-radius: 6px; font-weight: 700; font-size: 0.85rem;">FLYHIGH</span>
+                        <span style="font-size: 0.8rem; color: #10b981; font-weight: 700;">✓ Active Today</span>
+                    </div>
+                    <h3 style="font-size: 1.3rem; font-weight: 800; color: #1e3a8a; margin-bottom: 6px;">15% Off All Flights</h3>
+                    <p style="font-size: 0.9rem; color: #64748b; line-height: 1.5;">
+                        Valid on all domestic and international routes across all partner airlines. Max discount up to ₹1,200.
+                    </p>
+                </div>
+                <div style="margin-top: 20px; border-top: 1px solid #f1f5f9; padding-top: 16px; display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 0.8rem; color: #64748b;">Min fare ₹3,000</span>
+                    <a href="{{ url_for('index') }}" class="btn btn-primary btn-sm">Use Offer ➔</a>
+                </div>
+            </div>
+
+            <!-- Deal 2 -->
+            <div style="background: white; border-radius: 16px; border: 1px solid #e2e8f0; padding: 24px; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; justify-content: space-between;">
+                <div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <span style="background: #059669; color: white; padding: 4px 10px; border-radius: 6px; font-weight: 700; font-size: 0.85rem;">SKY500</span>
+                        <span style="font-size: 0.8rem; color: #10b981; font-weight: 700;">✓ Instant Cashback</span>
+                    </div>
+                    <h3 style="font-size: 1.3rem; font-weight: 800; color: #065f46; margin-bottom: 6px;">Flat ₹500 Off</h3>
+                    <p style="font-size: 0.9rem; color: #64748b; line-height: 1.5;">
+                        Weekend getaway special discount. Instant flat ₹500 deducted on all flight bookings above ₹2,500.
+                    </p>
+                </div>
+                <div style="margin-top: 20px; border-top: 1px solid #f1f5f9; padding-top: 16px; display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 0.8rem; color: #64748b;">No minimum seat count</span>
+                    <a href="{{ url_for('index') }}" class="btn btn-primary btn-sm">Use Offer ➔</a>
+                </div>
+            </div>
+
+            <!-- Deal 3 -->
+            <div style="background: white; border-radius: 16px; border: 1px solid #e2e8f0; padding: 24px; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; justify-content: space-between;">
+                <div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <span style="background: #ea580c; color: white; padding: 4px 10px; border-radius: 6px; font-weight: 700; font-size: 0.85rem;">FIRSTFLY</span>
+                        <span style="font-size: 0.8rem; color: #ea580c; font-weight: 700;">★ New Travelers</span>
+                    </div>
+                    <h3 style="font-size: 1.3rem; font-weight: 800; color: #9a3412; margin-bottom: 6px;">20% First Flight Bonus</h3>
+                    <p style="font-size: 0.9rem; color: #64748b; line-height: 1.5;">
+                        Special welcome deal for your first booking on SkyWings. Max discount up to ₹1,500.
+                    </p>
+                </div>
+                <div style="margin-top: 20px; border-top: 1px solid #f1f5f9; padding-top: 16px; display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 0.8rem; color: #64748b;">Min fare ₹3,500</span>
+                    <a href="{{ url_for('index') }}" class="btn btn-accent btn-sm">Use Offer ➔</a>
+                </div>
+            </div>
+
+            <!-- Deal 4 -->
+            <div style="background: white; border-radius: 16px; border: 1px solid #e2e8f0; padding: 24px; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; justify-content: space-between;">
+                <div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <span style="background: #7c3aed; color: white; padding: 4px 10px; border-radius: 6px; font-weight: 700; font-size: 0.85rem;">FESTIVE</span>
+                        <span style="font-size: 0.8rem; color: #7c3aed; font-weight: 700;">🎁 Seasonal</span>
+                    </div>
+                    <h3 style="font-size: 1.3rem; font-weight: 800; color: #5b21b6; margin-bottom: 6px;">10% Festival Savings</h3>
+                    <p style="font-size: 0.9rem; color: #64748b; line-height: 1.5;">
+                        Celebrate reunions and holidays with family. Enjoy up to ₹800 off on round-trip reservations.
+                    </p>
+                </div>
+                <div style="margin-top: 20px; border-top: 1px solid #f1f5f9; padding-top: 16px; display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 0.8rem; color: #64748b;">Min fare ₹2,000</span>
+                    <a href="{{ url_for('index') }}" class="btn btn-primary btn-sm">Use Offer ➔</a>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+</div>
+{% endblock %}

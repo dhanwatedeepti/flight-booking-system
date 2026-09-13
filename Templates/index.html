@@ -1,0 +1,288 @@
+{% extends "base.html" %}
+
+{% block title %}SkyWings - Search & Book Domestic & International Flights{% endblock %}
+
+{% block content %}
+<!-- Hero Banner -->
+<section class="hero">
+    <div class="container hero-content">
+        <div class="hero-badge">
+            <span>✨</span> Explore Over 500+ Domestic & Global Routes
+        </div>
+        <h1 class="hero-title">Where do you want to fly next?</h1>
+        <p class="hero-subtitle">
+            Compare prices across top airlines, unlock exclusive student and corporate discounts, and book your journey in seconds.
+        </p>
+    </div>
+</section>
+
+<!-- Search Widget Container -->
+<div class="container">
+    <div class="search-card">
+        <!-- Trip Type Selector -->
+        <form action="{{ url_for('search') }}" method="GET" id="flight_search_form">
+            <div class="search-tabs">
+                <label class="trip-type-label">
+                    <input type="radio" name="trip_type" value="one_way" checked> One Way
+                </label>
+                <label class="trip-type-label">
+                    <input type="radio" name="trip_type" value="round_trip"> Round Trip
+                </label>
+                <div style="margin-left: auto; display: flex; gap: 10px; font-size: 0.85rem; color: #64748b;">
+                    <span>✈ Regular Fare</span>
+                    <span>🎓 Student Discount</span>
+                    <span>🎖 Defense Personnel</span>
+                </div>
+            </div>
+
+            <!-- Search Inputs Grid -->
+            <div class="search-form-grid">
+                <!-- Origin -->
+                <div class="form-group">
+                    <label class="form-label" for="from_input">From (Departure City)</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon">🛫</span>
+                        <input type="text" id="from_input" name="from" class="form-control" 
+                               placeholder="e.g. Pune or PNQ" value="{{ default_from or 'Pune' }}" required autocomplete="off">
+                    </div>
+                    <div id="from_dropdown" class="autocomplete-list"></div>
+                </div>
+
+                <!-- Swap Button -->
+                <div style="display: flex; justify-content: center;">
+                    <button type="button" id="swap_cities_btn" class="swap-btn" title="Swap Cities">⇄</button>
+                </div>
+
+                <!-- Destination -->
+                <div class="form-group">
+                    <label class="form-label" for="to_input">To (Arrival City)</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon">🛬</span>
+                        <input type="text" id="to_input" name="to" class="form-control" 
+                               placeholder="e.g. Delhi or DEL" value="{{ default_to or 'Delhi' }}" required autocomplete="off">
+                    </div>
+                    <div id="to_dropdown" class="autocomplete-list"></div>
+                </div>
+
+                <!-- Departure Date -->
+                <div class="form-group">
+                    <label class="form-label" for="departure_date">Departure Date</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon">📅</span>
+                        <input type="date" id="departure_date" name="date" class="form-control" required>
+                    </div>
+                </div>
+
+                <!-- Return Date -->
+                <div class="form-group" id="return-date-group" style="opacity: 0.4; pointer-events: none;">
+                    <label class="form-label" for="return_date">Return Date</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon">📅</span>
+                        <input type="date" id="return_date" name="return_date" class="form-control">
+                    </div>
+                </div>
+
+                <!-- Passengers & Class -->
+                <div class="form-group">
+                    <label class="form-label" for="passengers_select">Travelers & Class</label>
+                    <select id="passengers_select" name="passengers" class="form-control form-select">
+                        <option value="1">1 Passenger, Economy</option>
+                        <option value="2">2 Passengers, Economy</option>
+                        <option value="3">3 Passengers, Economy</option>
+                        <option value="4">4 Passengers, Economy</option>
+                        <option value="1_business">1 Passenger, Business</option>
+                        <option value="2_business">2 Passengers, Business</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Submit Button & Quick Chips -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; flex-wrap: wrap; gap: 16px;">
+                <div class="quick-chips">
+                    <span class="chip-label">Popular:</span>
+                    <button type="button" class="chip" data-from="Pune" data-to="Delhi">Pune → Delhi</button>
+                    <button type="button" class="chip" data-from="Mumbai" data-to="Bangalore">Mumbai → Bangalore</button>
+                    <button type="button" class="chip" data-from="Bangalore" data-to="Goa">Bangalore → Goa</button>
+                    <button type="button" class="chip" data-from="Mumbai" data-to="Delhi">Mumbai → Delhi</button>
+                    <button type="button" class="chip" data-from="Mumbai" data-to="Dubai">Mumbai → Dubai</button>
+                </div>
+
+                <button type="submit" class="btn btn-accent btn-lg" style="min-width: 200px;">
+                    Search Flights ➔
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Promotional Coupons & Deals Banner -->
+<section style="padding: 60px 0 20px;">
+    <div class="container">
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 24px;">
+            <div>
+                <span class="badge-pill" style="background: #fef3c7; color: #92400e; font-weight: 700;">PROMO OFFERS</span>
+                <h2 style="font-size: 1.8rem; font-weight: 800; color: #0f172a; margin-top: 6px;">Exclusive Flight Offers For You</h2>
+            </div>
+            <a href="{{ url_for('deals') }}" style="font-weight: 600;">View All Offers ➔</a>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px;">
+            <!-- Offer Card 1 -->
+            <div style="background: linear-gradient(135deg, #eff6ff, #dbeafe); border-radius: 12px; padding: 20px; border: 1px solid #bfdbfe; display: flex; flex-direction: column; justify-content: space-between;">
+                <div>
+                    <span style="background: #2563eb; color: white; padding: 3px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 700;">CODE: FLYHIGH</span>
+                    <h3 style="font-size: 1.2rem; font-weight: 700; margin: 12px 0 6px; color: #1e3a8a;">Flat 15% OFF</h3>
+                    <p style="font-size: 0.85rem; color: #475569;">Save up to ₹1,200 on all domestic & international flight tickets.</p>
+                </div>
+                <div style="margin-top: 16px; display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 0.75rem; color: #64748b;">Min booking ₹3,000</span>
+                    <button class="btn btn-sm btn-primary" onclick="navigator.clipboard.writeText('FLYHIGH'); alert('Coupon FLYHIGH copied to clipboard!');">Copy Code</button>
+                </div>
+            </div>
+
+            <!-- Offer Card 2 -->
+            <div style="background: linear-gradient(135deg, #ecfdf5, #d1fae5); border-radius: 12px; padding: 20px; border: 1px solid #a7f3d0; display: flex; flex-direction: column; justify-content: space-between;">
+                <div>
+                    <span style="background: #059669; color: white; padding: 3px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 700;">CODE: SKY500</span>
+                    <h3 style="font-size: 1.2rem; font-weight: 700; margin: 12px 0 6px; color: #065f46;">Instant ₹500 OFF</h3>
+                    <p style="font-size: 0.85rem; color: #475569;">Instant cashback discount for your weekend getaways.</p>
+                </div>
+                <div style="margin-top: 16px; display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 0.75rem; color: #64748b;">Min booking ₹2,500</span>
+                    <button class="btn btn-sm btn-primary" onclick="navigator.clipboard.writeText('SKY500'); alert('Coupon SKY500 copied to clipboard!');">Copy Code</button>
+                </div>
+            </div>
+
+            <!-- Offer Card 3 -->
+            <div style="background: linear-gradient(135deg, #fff7ed, #ffedd5); border-radius: 12px; padding: 20px; border: 1px solid #fed7aa; display: flex; flex-direction: column; justify-content: space-between;">
+                <div>
+                    <span style="background: #ea580c; color: white; padding: 3px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 700;">CODE: FIRSTFLY</span>
+                    <h3 style="font-size: 1.2rem; font-weight: 700; margin: 12px 0 6px; color: #9a3412;">First Flight 20% OFF</h3>
+                    <p style="font-size: 0.85rem; color: #475569;">Welcome offer: Get up to ₹1,500 off on your first flight reservation.</p>
+                </div>
+                <div style="margin-top: 16px; display: flex; justify-content: space-between; align-items: center;">
+                    <span style="font-size: 0.75rem; color: #64748b;">For new travelers</span>
+                    <button class="btn btn-sm btn-accent" onclick="navigator.clipboard.writeText('FIRSTFLY'); alert('Coupon FIRSTFLY copied to clipboard!');">Copy Code</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Trending Flight Routes Grid -->
+<section style="padding: 40px 0 60px;">
+    <div class="container">
+        <h2 style="font-size: 1.8rem; font-weight: 800; color: #0f172a; margin-bottom: 24px;">Trending Routes Across India & Abroad</h2>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px;">
+            <!-- Route Card 1 -->
+            <div style="background: white; border-radius: 12px; border: 1px solid #e2e8f0; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.04); transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='translateY(0)'">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <div>
+                        <span style="font-weight: 700; font-size: 1.1rem; color: #0f172a;">Pune ➔ Delhi</span>
+                        <div style="font-size: 0.8rem; color: #64748b;">PNQ to DEL • Non-stop (2h 10m)</div>
+                    </div>
+                    <span class="badge-pill" style="background: #ecfdf5; color: #065f46;">Daily 5+ Flights</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #f1f5f9; padding-top: 12px;">
+                    <div>
+                        <span style="font-size: 0.75rem; color: #64748b;">Fares starting from</span>
+                        <div style="font-size: 1.3rem; font-weight: 800; color: #1e40af;">₹2,950</div>
+                    </div>
+                    <a href="{{ url_for('search') }}?from=Pune&to=Delhi" class="btn btn-outline btn-sm">View Flights</a>
+                </div>
+            </div>
+
+            <!-- Route Card 2 -->
+            <div style="background: white; border-radius: 12px; border: 1px solid #e2e8f0; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.04); transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='translateY(0)'">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <div>
+                        <span style="font-weight: 700; font-size: 1.1rem; color: #0f172a;">Mumbai ➔ Bangalore</span>
+                        <div style="font-size: 0.8rem; color: #64748b;">BOM to BLR • Non-stop (1h 45m)</div>
+                    </div>
+                    <span class="badge-pill" style="background: #eff6ff; color: #1e40af;">High Demand</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #f1f5f9; padding-top: 12px;">
+                    <div>
+                        <span style="font-size: 0.75rem; color: #64748b;">Fares starting from</span>
+                        <div style="font-size: 1.3rem; font-weight: 800; color: #1e40af;">₹2,850</div>
+                    </div>
+                    <a href="{{ url_for('search') }}?from=Mumbai&to=Bangalore" class="btn btn-outline btn-sm">View Flights</a>
+                </div>
+            </div>
+
+            <!-- Route Card 3 -->
+            <div style="background: white; border-radius: 12px; border: 1px solid #e2e8f0; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.04); transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='translateY(0)'">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <div>
+                        <span style="font-weight: 700; font-size: 1.1rem; color: #0f172a;">Bangalore ➔ Goa</span>
+                        <div style="font-size: 0.8rem; color: #64748b;">BLR to GOI • Non-stop (1h 15m)</div>
+                    </div>
+                    <span class="badge-pill" style="background: #fef3c7; color: #92400e;">Holiday Special</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #f1f5f9; padding-top: 12px;">
+                    <div>
+                        <span style="font-size: 0.75rem; color: #64748b;">Fares starting from</span>
+                        <div style="font-size: 1.3rem; font-weight: 800; color: #1e40af;">₹2,350</div>
+                    </div>
+                    <a href="{{ url_for('search') }}?from=Bangalore&to=Goa" class="btn btn-outline btn-sm">View Flights</a>
+                </div>
+            </div>
+
+            <!-- Route Card 4 -->
+            <div style="background: white; border-radius: 12px; border: 1px solid #e2e8f0; padding: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.04); transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-3px)'" onmouseout="this.style.transform='translateY(0)'">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <div>
+                        <span style="font-weight: 700; font-size: 1.1rem; color: #0f172a;">Mumbai ➔ Dubai</span>
+                        <div style="font-size: 0.8rem; color: #64748b;">BOM to DXB • Non-stop (3h 15m)</div>
+                    </div>
+                    <span class="badge-pill" style="background: #f1f5f9; color: #0f172a;">International</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #f1f5f9; padding-top: 12px;">
+                    <div>
+                        <span style="font-size: 0.75rem; color: #64748b;">Fares starting from</span>
+                        <div style="font-size: 1.3rem; font-weight: 800; color: #1e40af;">₹9,900</div>
+                    </div>
+                    <a href="{{ url_for('search') }}?from=Mumbai&to=Dubai" class="btn btn-outline btn-sm">View Flights</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Why Book With SkyWings -->
+<section style="background: white; padding: 60px 0; border-top: 1px solid #e2e8f0;">
+    <div class="container">
+        <div style="text-align: center; max-width: 600px; margin: 0 auto 40px;">
+            <h2 style="font-size: 1.8rem; font-weight: 800; color: #0f172a;">Why Millions Fly With SkyWings</h2>
+            <p style="color: #64748b; font-size: 0.95rem;">Experience unmatched convenience, real-time ticket confirmation, and dedicated 24/7 care.</p>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px;">
+            <div style="text-align: center; padding: 24px; border-radius: 12px; background: #f8fafc;">
+                <div style="font-size: 2.2rem; margin-bottom: 12px;">⚡</div>
+                <h4 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 8px;">Instant E-Ticket & PNR</h4>
+                <p style="font-size: 0.85rem; color: #64748b;">Get confirmed boarding passes with barcodes ready to print or save immediately after payment.</p>
+            </div>
+
+            <div style="text-align: center; padding: 24px; border-radius: 12px; background: #f8fafc;">
+                <div style="font-size: 2.2rem; margin-bottom: 12px;">💺</div>
+                <h4 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 8px;">Interactive Cabin Seat Map</h4>
+                <p style="font-size: 0.85rem; color: #64748b;">Select your favorite window, aisle, or extra-legroom seats on an authentic aircraft cabin grid.</p>
+            </div>
+
+            <div style="text-align: center; padding: 24px; border-radius: 12px; background: #f8fafc;">
+                <div style="font-size: 2.2rem; margin-bottom: 12px;">🛡️</div>
+                <h4 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 8px;">Zero Hidden Fees</h4>
+                <p style="font-size: 0.85rem; color: #64748b;">Transparent fare breakdown with baggage allowance, airport taxes, and meals clearly displayed.</p>
+            </div>
+
+            <div style="text-align: center; padding: 24px; border-radius: 12px; background: #f8fafc;">
+                <div style="font-size: 2.2rem; margin-bottom: 12px;">🔄</div>
+                <h4 style="font-size: 1.1rem; font-weight: 700; margin-bottom: 8px;">Easy Cancellation & Refund</h4>
+                <p style="font-size: 0.85rem; color: #64748b;">Instant self-service cancellation with clear 85% refund calculation right from your dashboard.</p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
