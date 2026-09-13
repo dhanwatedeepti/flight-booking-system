@@ -1,0 +1,23 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Local environment & secret email credentials
+email_config.py
+.env
+*.env
+
+# Local sent emails archive
+sent_emails/
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# Editor & OS files
+.vscode/
+.idea/
+Thumbs.db
+.DS_Store

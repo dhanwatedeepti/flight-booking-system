@@ -11,18 +11,27 @@
             ✓
         </div>
         <h1 style="font-size: 1.8rem; font-weight: 800; color: #0f172a;">Booking Confirmed!</h1>
-        <p style="color: #64748b; font-size: 0.95rem; margin-top: 4px;">
-            Your e-ticket has been generated. Confirmation sent to <b>{{ booking.passenger_email }}</b>.
-        </p>
+        <div style="background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 8px; padding: 12px 18px; margin: 14px auto; max-width: 580px; color: #065f46; font-size: 0.95rem; font-weight: 600;">
+            📧 Confirmed e-ticket & boarding pass sent to: <u>{{ booking.passenger_email }}</u>
+        </div>
 
         <!-- Action Toolbar -->
-        <div style="display: flex; justify-content: center; gap: 12px; margin-top: 20px; flex-wrap: wrap;">
+        <div style="display: flex; justify-content: center; gap: 12px; margin-top: 16px; flex-wrap: wrap; align-items: center;">
             <button onclick="window.print()" class="btn btn-primary">
                 🖨️ Print / Save as PDF
             </button>
             <a href="{{ url_for('my_bookings') }}" class="btn btn-outline">
                 📋 View in My Bookings
             </a>
+            {% if booking.booking_status == 'Confirmed' %}
+                <form action="{{ url_for('cancel_flight_booking', pnr=booking.pnr) }}" method="POST" style="margin: 0;" onsubmit="return confirm('Are you sure you want to cancel booking {{ booking.pnr }}? An 85% refund of ₹{{ '{:,}'.format((booking.total_price * 0.85) | round | int) }} will be initiated and a confirmation email will be sent.')">
+                    <button type="submit" class="btn btn-outline btn-danger">
+                        ✕ Cancel Flight (85% Refund)
+                    </button>
+                </form>
+            {% else %}
+                <span class="status-badge status-cancelled">✕ Cancelled (Refund Initiated)</span>
+            {% endif %}
             <a href="{{ url_for('index') }}" class="btn btn-outline">
                 ✈️ Book Another Flight
             </a>

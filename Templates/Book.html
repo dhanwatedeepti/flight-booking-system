@@ -31,9 +31,11 @@
             <input type="hidden" name="travel_date" value="{{ travel_date }}">
             <input type="hidden" name="passengers_count" id="passengers_count_val" value="{{ passengers_count }}">
             <input type="hidden" name="cabin_class" value="{{ cabin_class }}">
+            <input type="hidden" name="fare_type" value="{{ fare_type }}">
+            <input type="hidden" name="concession_discount" value="{{ concession_discount }}">
             <input type="hidden" name="selected_seats" id="selected_seats_input" value="">
             <input type="hidden" name="add_on_fee" id="add_on_fee_input" value="0">
-            <input type="hidden" name="discount" id="discount_input" value="0">
+            <input type="hidden" name="discount" id="discount_input" value="{{ concession_discount }}">
             <input type="hidden" name="coupon_code" id="coupon_code_hidden" value="">
             <input type="hidden" name="total_price" id="total_price_input" value="{{ total_initial_price }}">
 
@@ -44,9 +46,21 @@
 
                     <!-- Flight Brief Summary Card -->
                     <div class="checkout-section">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
                             <span class="badge-pill" style="background: #eff6ff; color: #1e40af; font-weight: 700;">{{ flight.airline }} • {{ flight.flight_number }}</span>
-                            <span style="font-size: 0.85rem; color: #64748b;">📅 {{ travel_date }} • {{ cabin_class }}</span>
+                            <div style="display: flex; gap: 8px; align-items: center;">
+                                <span class="badge-pill" style="font-weight: 600;">💺 {{ cabin_class }}</span>
+                                {% if fare_type == 'Student' %}
+                                    <span class="concession-badge concession-student">🎓 Student Fare</span>
+                                {% elif fare_type == 'Senior Citizen' %}
+                                    <span class="concession-badge concession-senior">👴 Senior Citizen</span>
+                                {% elif fare_type == 'Armed Forces' %}
+                                    <span class="concession-badge concession-defence">🎖️ Armed Forces</span>
+                                {% else %}
+                                    <span class="badge-pill">✈️ Regular</span>
+                                {% endif %}
+                                <span style="font-size: 0.85rem; color: #64748b;">📅 {{ travel_date }}</span>
+                            </div>
                         </div>
                         <div style="display: flex; align-items: center; justify-content: space-between; background: #f8fafc; padding: 16px; border-radius: 8px;">
                             <div>
@@ -58,6 +72,7 @@
                                 <div style="color: var(--primary);">✈ ➔</div>
                                 <div style="font-size: 0.75rem; color: #10b981; font-weight: 600;">{{ flight.layover }}</div>
                             </div>
+
                             <div style="text-align: right;">
                                 <div style="font-size: 1.4rem; font-weight: 800;">{{ flight.arrival_time }}</div>
                                 <div style="font-weight: 600;">{{ flight.destination_city }} ({{ flight.destination_code }})</div>
@@ -318,8 +333,16 @@
                                 <span id="summary_base_fare" data-amount="{{ flight.price * passengers_count }}">₹{{ "{:,}".format(flight.price * passengers_count) }}</span>
                             </div>
 
+                            <!-- Concession Discount -->
+                            {% if concession_discount > 0 %}
+                            <div class="summary-row discount" style="display: flex;">
+                                <span>{{ fare_type }} Concession Discount</span>
+                                <span style="color: #059669; font-weight: 700;">-₹{{ "{:,}".format(concession_discount) }}</span>
+                            </div>
+                            {% endif %}
+
                             <!-- Taxes & Fees -->
-                            {% set taxes = (flight.price * passengers_count * 0.12) | round | int %}
+                            {% set taxes = ((flight.price * passengers_count - concession_discount) * 0.12) | round | int %}
                             <div class="summary-row">
                                 <span>Airport Taxes & GST</span>
                                 <span id="summary_taxes" data-amount="{{ taxes }}">₹{{ "{:,}".format(taxes) }}</span>
@@ -340,7 +363,7 @@
                             <!-- Grand Total -->
                             <div class="summary-row total">
                                 <span>Total Amount</span>
-                                <span id="summary_total" style="color: var(--primary-dark);">₹{{ "{:,}".format((flight.price * passengers_count) + taxes) }}</span>
+                                <span id="summary_total" style="color: var(--primary-dark);">₹{{ "{:,}".format((flight.price * passengers_count - concession_discount) + taxes) }}</span>
                             </div>
 
                             <!-- Coupon Code Box -->

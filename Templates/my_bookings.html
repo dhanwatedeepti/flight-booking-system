@@ -10,20 +10,30 @@
         <div class="bookings-header">
             <h1 style="font-size: 2rem; font-weight: 800; color: #0f172a; margin-bottom: 8px;">Manage Your Trips</h1>
             <p style="color: #64748b; margin-bottom: 24px;">
-                Enter your Booking Reference (PNR) or registered email address to view itinerary, print boarding passes, or manage cancellations.
+                Enter your secret Booking Reference (PNR) or registered email address to view your itinerary, print boarding passes, or manage cancellations.
             </p>
 
             <form action="{{ url_for('my_bookings') }}" method="GET" style="display: flex; gap: 12px; max-width: 600px;">
-                <input type="text" name="q" class="form-control" placeholder="Enter PNR (e.g. SKY-XYZ123) or Email" value="{{ search_query or '' }}" required style="padding-left: 14px;">
-                <button type="submit" class="btn btn-primary" style="white-space: nowrap;">Find Booking</button>
+                <input type="text" name="q" class="form-control" placeholder="Enter your PNR (e.g. SKY-XYZ123) or Email" value="{{ search_query or '' }}" required style="padding-left: 14px; text-transform: uppercase;">
+                <button type="submit" class="btn btn-primary" style="white-space: nowrap;">Find My Booking</button>
             </form>
         </div>
 
         <!-- Bookings List -->
         {% if bookings %}
             <div style="margin-top: 32px;">
+
+                {% if is_temporary_session %}
+                    <div class="privacy-notice-box">
+                        <span style="font-size: 1.4rem;">🔒</span>
+                        <div>
+                            <b>Active Session Booking:</b> This ticket is visible while you are on this page. For passenger privacy and data security, this temporary display clears upon page refresh. You can retrieve your booking anytime by entering your PNR <b>{{ bookings[0].pnr }}</b> above.
+                        </div>
+                    </div>
+                {% endif %}
+
                 <h2 style="font-size: 1.3rem; font-weight: 700; margin-bottom: 16px; color: #0f172a;">
-                    Found {{ bookings|length }} Booking(s)
+                    Your Reservation ({{ bookings|length }})
                 </h2>
 
                 {% for booking in bookings %}
@@ -38,9 +48,9 @@
 
                             <div style="display: flex; align-items: center; gap: 12px;">
                                 {% if booking.booking_status == 'Confirmed' %}
-                                    <span class="status-badge status-confirmed">✓ Confirmed</span>
+                                    <span class="status-badge status-confirmed">✓ Confirmed & Paid</span>
                                 {% else %}
-                                    <span class="status-badge status-cancelled">✕ Cancelled</span>
+                                    <span class="status-badge status-cancelled">✕ Cancelled (Refunded)</span>
                                 {% endif %}
                                 <span style="font-size: 0.85rem; color: #64748b;">Booked on {{ booking.created_at[:10] }}</span>
                             </div>
@@ -59,6 +69,9 @@
                                 <div style="font-size: 0.85rem; color: #0f172a; margin-top: 4px;">
                                     📅 <b>{{ booking.travel_date }}</b> at <b>{{ booking.departure_time }}</b> (Arrival: {{ booking.arrival_time }})
                                 </div>
+                                <div style="font-size: 0.8rem; color: #2563eb; font-weight: 600; margin-top: 4px;">
+                                    Class: {{ booking.cabin_class }} • Fare: {{ booking.get('fare_type', 'Regular') }}
+                                </div>
                             </div>
 
                             <!-- Passenger & Seats -->
@@ -70,6 +83,9 @@
                                 <div style="font-size: 0.85rem; color: var(--primary); font-weight: 600; margin-top: 2px;">
                                     Seat(s): {{ booking.seat_numbers or 'Auto-assigned' }}
                                 </div>
+                                <div style="font-size: 0.75rem; color: #64748b; margin-top: 2px;">
+                                    Email: {{ booking.passenger_email }}
+                                </div>
                             </div>
 
                             <!-- Actions -->
@@ -78,16 +94,20 @@
                                     ₹{{ "{:,}".format(booking.total_price | round | int) }}
                                 </div>
 
-                                <div style="display: flex; gap: 8px;">
+                                <div style="display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end;">
                                     <a href="{{ url_for('ticket', pnr=booking.pnr) }}" class="btn btn-primary btn-sm">
                                         Boarding Pass
                                     </a>
                                     {% if booking.booking_status == 'Confirmed' %}
-                                        <form action="{{ url_for('cancel_flight_booking', pnr=booking.pnr) }}" method="POST" onsubmit="return confirm('Are you sure you want to cancel booking {{ booking.pnr }}? An 85% refund of ₹{{ '{:,}'.format((booking.total_price * 0.85) | round | int) }} will be credited.')">
+                                        <form action="{{ url_for('cancel_flight_booking', pnr=booking.pnr) }}" method="POST" onsubmit="return confirm('Are you sure you want to cancel booking {{ booking.pnr }}? An 85% refund of ₹{{ '{:,}'.format((booking.total_price * 0.85) | round | int) }} will be credited and confirmation email will be sent.')">
                                             <button type="submit" class="btn btn-outline btn-sm btn-danger" style="border:none;">
-                                                Cancel
+                                                ✕ Cancel Flight
                                             </button>
                                         </form>
+                                    {% else %}
+                                        <span style="font-size: 0.8rem; color: #059669; font-weight: 700;">
+                                            Refund: ₹{{ "{:,}".format(booking.refund_amount | round | int) }}
+                                        </span>
                                     {% endif %}
                                 </div>
                             </div>
@@ -99,22 +119,25 @@
         {% elif search_query %}
             <div style="background: white; border-radius: 12px; border: 1px solid #e2e8f0; padding: 48px 20px; text-align: center; max-width: 600px; margin: 40px auto;">
                 <div style="font-size: 3rem; margin-bottom: 12px;">🔍</div>
-                <h3 style="font-size: 1.3rem; font-weight: 700; color: #0f172a; margin-bottom: 8px;">No Bookings Found</h3>
+                <h3 style="font-size: 1.3rem; font-weight: 700; color: #0f172a; margin-bottom: 8px;">No Booking Found</h3>
                 <p style="color: #64748b; font-size: 0.9rem; margin-bottom: 20px;">
-                    We couldn't find any reservations under "<b>{{ search_query }}</b>". Please check your PNR or email.
+                    We couldn't find any reservations under "<b>{{ search_query }}</b>". Please check your PNR or registered email.
                 </p>
                 <a href="{{ url_for('my_bookings') }}" class="btn btn-outline btn-sm">Clear Search</a>
             </div>
 
         {% else %}
-            <!-- Default Empty State -->
-            <div style="background: white; border-radius: 16px; border: 1px solid #e2e8f0; padding: 60px 20px; text-align: center; max-width: 650px; margin: 40px auto;">
-                <div style="font-size: 3.5rem; margin-bottom: 16px;">✈️</div>
-                <h3 style="font-size: 1.4rem; font-weight: 800; color: #0f172a; margin-bottom: 8px;">No Upcoming Trips Yet?</h3>
+            <!-- Default Private State (No other person's booking shown!) -->
+            <div style="background: white; border-radius: 16px; border: 1px solid #e2e8f0; padding: 50px 20px; text-align: center; max-width: 650px; margin: 40px auto;">
+                <div style="font-size: 3rem; margin-bottom: 14px;">🔒</div>
+                <h3 style="font-size: 1.35rem; font-weight: 800; color: #0f172a; margin-bottom: 8px;">Private Trip Lookup</h3>
                 <p style="color: #64748b; font-size: 0.95rem; margin-bottom: 24px; line-height: 1.6;">
-                    Plan your next adventure today. Search thousands of flights across top domestic and international destinations with unbeatable prices.
+                    For passenger privacy, booking details are confidential. Please search your <b>PNR</b> (e.g. SKY-XYZ123) or <b>registered email</b> above to access your boarding pass.
                 </p>
-                <a href="{{ url_for('index') }}" class="btn btn-primary btn-lg">Search Flights Now ➔</a>
+                <div style="display: flex; justify-content: center; gap: 12px;">
+                    <a href="{{ url_for('index') }}" class="btn btn-primary">Book New Flight ➔</a>
+                    <a href="{{ url_for('support') }}" class="btn btn-outline">Need Help? Contact Support</a>
+                </div>
             </div>
         {% endif %}
 

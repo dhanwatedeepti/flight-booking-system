@@ -76,24 +76,28 @@
                             <div style="display: flex; flex-direction: column; gap: 14px;">
                                 <div>
                                     <label class="form-label" for="card_number_input">Card Number</label>
-                                    <input type="text" id="card_number_input" class="form-control" placeholder="4111 2222 3333 4444" maxlength="19" required style="padding-left: 12px; font-family: monospace;">
+                                    <input type="text" id="card_number_input" class="form-control" placeholder="4111 2222 3333 4444" maxlength="19" style="padding-left: 12px; font-family: monospace;">
                                 </div>
 
                                 <div>
                                     <label class="form-label" for="card_holder_input">Cardholder Name</label>
-                                    <input type="text" id="card_holder_input" class="form-control" placeholder="Name on card" value="{{ booking.passenger_name }}" required style="padding-left: 12px;">
+                                    <input type="text" id="card_holder_input" class="form-control" placeholder="Name on card" value="{{ booking.passenger_name }}" style="padding-left: 12px;">
                                 </div>
 
                                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
                                     <div>
                                         <label class="form-label" for="card_exp_input">Expiry Date (MM/YY)</label>
-                                        <input type="text" id="card_exp_input" class="form-control" placeholder="12/28" maxlength="5" required style="padding-left: 12px; font-family: monospace;">
+                                        <input type="text" id="card_exp_input" class="form-control" placeholder="12/28" maxlength="5" style="padding-left: 12px; font-family: monospace;">
                                     </div>
                                     <div>
                                         <label class="form-label" for="card_cvv_input">CVV / CVC</label>
-                                        <input type="password" id="card_cvv_input" class="form-control" placeholder="•••" maxlength="4" required style="padding-left: 12px; font-family: monospace;">
+                                        <input type="password" id="card_cvv_input" class="form-control" placeholder="•••" maxlength="4" style="padding-left: 12px; font-family: monospace;">
                                     </div>
                                 </div>
+
+                                <button type="button" id="pay_card_btn" class="btn btn-accent btn-lg" style="width: 100%; margin-top: 10px; font-size: 1.05rem;">
+                                    Pay ₹{{ "{:,}".format(booking.total_price | round | int) }} via Card ➔
+                                </button>
                             </div>
                         </div>
 
@@ -107,47 +111,60 @@
                                         <circle cx="50" cy="50" r="8" fill="#2563eb" />
                                     </svg>
                                 </div>
-                                <div style="font-weight: 700; margin-bottom: 4px;">Scan with any UPI App</div>
-                                <div style="font-size: 0.8rem; color: #64748b;">Google Pay, PhonePe, Paytm, BHIM, Cred</div>
+                                <div style="font-weight: 700; margin-bottom: 4px;">Scan with Any UPI App</div>
+                                <div style="font-size: 0.8rem; color: #64748b; margin-bottom: 12px;">Google Pay • PhonePe • Paytm • BHIM • Cred</div>
+
+                                <button type="button" id="simulate_qr_btn" class="btn btn-primary" style="margin-bottom: 8px;">
+                                    ✓ Confirm Payment Completed via QR Code
+                                </button>
                             </div>
 
                             <div style="margin-top: 16px;">
-                                <label class="form-label">Or Pay with UPI VPA ID</label>
-                                <div style="display: flex; gap: 10px;">
-                                    <input type="text" class="form-control" placeholder="e.g. yourname@okhdfcbank" style="padding-left: 12px;">
-                                    <button type="button" class="btn btn-outline btn-sm" onclick="alert('UPI ID Verified!')">Verify</button>
+                                <label class="form-label">Or Pay with Virtual Payment Address (UPI ID)</label>
+                                <div style="display: flex; gap: 10px; margin-bottom: 16px;">
+                                    <input type="text" id="upi_id_input" class="form-control" placeholder="e.g. traveler@okhdfcbank" value="{{ booking.passenger_email.split('@')[0] }}@upi" style="padding-left: 12px;">
+                                    <button type="button" id="pay_upi_vpa_btn" class="btn btn-accent" style="white-space: nowrap;">
+                                        Pay via UPI ID ➔
+                                    </button>
                                 </div>
                             </div>
                         </div>
 
                         <!-- Pane 3: Net Banking -->
                         <div id="netbanking_pane" class="payment-pane" style="display: none;">
-                            <label class="form-label" style="margin-bottom: 12px;">Popular Banks</label>
+                            <label class="form-label" style="margin-bottom: 12px;">Select Your Bank</label>
                             <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px;">
-                                <label style="border: 1px solid #cbd5e1; border-radius: 8px; padding: 12px; text-align: center; cursor: pointer; background: white;">
-                                    <input type="radio" name="bank" value="HDFC" checked style="accent-color: var(--primary);">
+                                <label style="border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 14px 10px; text-align: center; cursor: pointer; background: white; transition: all 0.2s;" class="bank-pill">
+                                    <input type="radio" name="bank_select" value="HDFC Bank" checked style="accent-color: var(--primary);">
                                     <div style="font-weight: 700; font-size: 0.9rem; margin-top: 4px;">HDFC Bank</div>
                                 </label>
-                                <label style="border: 1px solid #cbd5e1; border-radius: 8px; padding: 12px; text-align: center; cursor: pointer; background: white;">
-                                    <input type="radio" name="bank" value="SBI" style="accent-color: var(--primary);">
-                                    <div style="font-weight: 700; font-size: 0.9rem; margin-top: 4px;">State Bank</div>
+                                <label style="border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 14px 10px; text-align: center; cursor: pointer; background: white; transition: all 0.2s;" class="bank-pill">
+                                    <input type="radio" name="bank_select" value="State Bank of India (SBI)" style="accent-color: var(--primary);">
+                                    <div style="font-weight: 700; font-size: 0.9rem; margin-top: 4px;">SBI</div>
                                 </label>
-                                <label style="border: 1px solid #cbd5e1; border-radius: 8px; padding: 12px; text-align: center; cursor: pointer; background: white;">
-                                    <input type="radio" name="bank" value="ICICI" style="accent-color: var(--primary);">
+                                <label style="border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 14px 10px; text-align: center; cursor: pointer; background: white; transition: all 0.2s;" class="bank-pill">
+                                    <input type="radio" name="bank_select" value="ICICI Bank" style="accent-color: var(--primary);">
                                     <div style="font-weight: 700; font-size: 0.9rem; margin-top: 4px;">ICICI Bank</div>
                                 </label>
                             </div>
 
-                            <div>
-                                <label class="form-label">All Other Banks</label>
-                                <select class="form-control" style="padding-left: 12px;">
-                                    <option>Axis Bank</option>
-                                    <option>Kotak Mahindra Bank</option>
-                                    <option>Punjab National Bank</option>
-                                    <option>Bank of Baroda</option>
-                                    <option>IndusInd Bank</option>
+                            <div style="margin-bottom: 20px;">
+                                <label class="form-label">All Other Retail & Corporate Banks</label>
+                                <select id="other_banks_select" class="form-control" style="padding-left: 12px;">
+                                    <option value="">-- Choose Bank from List --</option>
+                                    <option value="Axis Bank">Axis Bank</option>
+                                    <option value="Kotak Mahindra Bank">Kotak Mahindra Bank</option>
+                                    <option value="Punjab National Bank">Punjab National Bank</option>
+                                    <option value="Bank of Baroda">Bank of Baroda</option>
+                                    <option value="IndusInd Bank">IndusInd Bank</option>
+                                    <option value="Canara Bank">Canara Bank</option>
+                                    <option value="Union Bank of India">Union Bank of India</option>
                                 </select>
                             </div>
+
+                            <button type="button" id="pay_netbanking_btn" class="btn btn-accent btn-lg" style="width: 100%; font-size: 1.05rem;">
+                                Proceed to Bank Portal & Pay ₹{{ "{:,}".format(booking.total_price | round | int) }} ➔
+                            </button>
                         </div>
 
                         <!-- Security Assurances -->
@@ -156,11 +173,6 @@
                             <span>✓ RBI Compliant</span>
                             <span>🛡️ Zero Fraud Liability</span>
                         </div>
-
-                        <!-- Pay Button -->
-                        <button type="submit" id="pay_btn" class="btn btn-accent btn-lg" style="width: 100%; margin-top: 20px; font-size: 1.1rem; box-shadow: 0 4px 14px rgba(249, 115, 22, 0.35);">
-                            Pay ₹{{ "{:,}".format(booking.total_price | round | int) }} & Generate E-Ticket ➔
-                        </button>
                     </form>
                 </div>
             </div>
@@ -191,6 +203,11 @@
                     </div>
 
                     <div class="summary-row">
+                        <span>Fare Category</span>
+                        <span style="font-weight: 700; color: #1e40af;">{{ booking.get('fare_type', 'Regular') }}</span>
+                    </div>
+
+                    <div class="summary-row">
                         <span>Seat Number(s)</span>
                         <span style="font-weight: 700; color: var(--primary);">{{ booking.seat_numbers or 'Auto-assigned at Gate' }}</span>
                     </div>
@@ -214,7 +231,7 @@
 
                     {% if booking.discount > 0 %}
                     <div class="summary-row discount">
-                        <span>Coupon Discount</span>
+                        <span>Discount / Concession</span>
                         <span>-₹{{ "{:,}".format(booking.discount | round | int) }}</span>
                     </div>
                     {% endif %}
@@ -234,4 +251,88 @@
 
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const form = document.getElementById('payment_form');
+    const paymentMethodInput = document.getElementById('payment_method_input');
+
+    // 1. Credit / Debit Card Pay Handler
+    const cardPayBtn = document.getElementById('pay_card_btn');
+    if (cardPayBtn) {
+        cardPayBtn.addEventListener('click', () => {
+            const cardNum = document.getElementById('card_number_input').value.trim();
+            const cardName = document.getElementById('card_holder_input').value.trim();
+            const cardExp = document.getElementById('card_exp_input').value.trim();
+            const cardCvv = document.getElementById('card_cvv_input').value.trim();
+
+            if (!cardNum || cardNum.length < 15) {
+                alert('Please enter a valid 16-digit Card Number.');
+                return;
+            }
+            if (!cardName) {
+                alert('Please enter the Cardholder Name.');
+                return;
+            }
+            if (!cardExp || !cardExp.includes('/')) {
+                alert('Please enter a valid Expiry Date (MM/YY).');
+                return;
+            }
+            if (!cardCvv || cardCvv.length < 3) {
+                alert('Please enter a valid 3-digit CVV.');
+                return;
+            }
+
+            paymentMethodInput.value = 'Credit / Debit Card';
+            cardPayBtn.innerHTML = 'Processing Payment... ⌛';
+            cardPayBtn.disabled = true;
+            form.submit();
+        });
+    }
+
+    // 2. UPI QR Code Pay Handler
+    const qrBtn = document.getElementById('simulate_qr_btn');
+    if (qrBtn) {
+        qrBtn.addEventListener('click', () => {
+            paymentMethodInput.value = 'UPI (QR Code Scan)';
+            qrBtn.innerHTML = 'Processing UPI Confirmation... ⌛';
+            qrBtn.disabled = true;
+            form.submit();
+        });
+    }
+
+    // 3. UPI VPA ID Pay Handler
+    const upiVpaBtn = document.getElementById('pay_upi_vpa_btn');
+    if (upiVpaBtn) {
+        upiVpaBtn.addEventListener('click', () => {
+            const upiId = document.getElementById('upi_id_input').value.trim();
+            if (!upiId || !upiId.includes('@')) {
+                alert('Please enter a valid UPI VPA ID (e.g. yourname@okhdfcbank or yourname@paytm).');
+                return;
+            }
+            paymentMethodInput.value = `UPI (${upiId})`;
+            upiVpaBtn.innerHTML = 'Authorizing UPI... ⌛';
+            upiVpaBtn.disabled = true;
+            form.submit();
+        });
+    }
+
+    // 4. Net Banking Pay Handler
+    const netbankingBtn = document.getElementById('pay_netbanking_btn');
+    if (netbankingBtn) {
+        netbankingBtn.addEventListener('click', () => {
+            let selectedBank = document.querySelector('input[name="bank_select"]:checked')?.value || 'HDFC Bank';
+            const otherBank = document.getElementById('other_banks_select')?.value;
+            if (otherBank) {
+                selectedBank = otherBank;
+            }
+
+            paymentMethodInput.value = `Net Banking (${selectedBank})`;
+            netbankingBtn.innerHTML = `Connecting to ${selectedBank}... ⌛`;
+            netbankingBtn.disabled = true;
+            form.submit();
+        });
+    }
+});
+</script>
 {% endblock %}

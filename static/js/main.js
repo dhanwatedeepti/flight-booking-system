@@ -511,8 +511,19 @@ function initPaymentTabs() {
     const tabBtns = document.querySelectorAll('.payment-tab-btn');
     const tabPanes = document.querySelectorAll('.payment-pane');
     const paymentMethodInput = document.getElementById('payment_method_input');
+    const cardInputs = document.querySelectorAll('#card_pane input');
 
     if (!tabBtns.length) return;
+
+    function setCardRequired(isRequired) {
+        cardInputs.forEach(input => {
+            if (isRequired) {
+                input.setAttribute('required', 'required');
+            } else {
+                input.removeAttribute('required');
+            }
+        });
+    }
 
     tabBtns.forEach(btn => {
         btn.addEventListener('click', () => {
@@ -523,11 +534,25 @@ function initPaymentTabs() {
             const targetPane = document.getElementById(btn.dataset.target);
             if (targetPane) targetPane.style.display = 'block';
 
+            const method = btn.dataset.method;
             if (paymentMethodInput) {
-                paymentMethodInput.value = btn.dataset.method;
+                paymentMethodInput.value = method;
+            }
+
+            // Only require card inputs when Card pane is active
+            if (btn.dataset.target === 'card_pane') {
+                setCardRequired(true);
+            } else {
+                setCardRequired(false);
             }
         });
     });
+
+    // Set initial requirement based on active pane
+    const activeTab = document.querySelector('.payment-tab-btn.active');
+    if (activeTab && activeTab.dataset.target !== 'card_pane') {
+        setCardRequired(false);
+    }
 }
 
 /* --------------------------------------------------------------------------

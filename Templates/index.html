@@ -28,15 +28,50 @@
                 <label class="trip-type-label">
                     <input type="radio" name="trip_type" value="round_trip"> Round Trip
                 </label>
-                <div style="margin-left: auto; display: flex; gap: 10px; font-size: 0.85rem; color: #64748b;">
-                    <span>✈ Regular Fare</span>
-                    <span>🎓 Student Discount</span>
-                    <span>🎖 Defense Personnel</span>
+            </div>
+
+            <!-- Special Fare Concession Pills -->
+            <div style="margin-bottom: 16px;">
+                <div style="font-size: 0.8rem; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 8px;">
+                    Select Fare Category / Special Concession:
+                </div>
+                <div class="fare-types-container" style="margin-top: 0;">
+                    <label class="fare-type-radio">
+                        <input type="radio" name="fare_type" value="Regular" checked>
+                        <div class="fare-type-pill">
+                            <span class="fare-pill-title">✈️ Regular Fare</span>
+                            <span class="fare-pill-sub">Standard standard fares</span>
+                        </div>
+                    </label>
+
+                    <label class="fare-type-radio">
+                        <input type="radio" name="fare_type" value="Student">
+                        <div class="fare-type-pill">
+                            <span class="fare-pill-title">🎓 Student Discount</span>
+                            <span class="fare-pill-sub">Extra 10% OFF + 10kg Free Baggage</span>
+                        </div>
+                    </label>
+
+                    <label class="fare-type-radio">
+                        <input type="radio" name="fare_type" value="Senior Citizen">
+                        <div class="fare-type-pill">
+                            <span class="fare-pill-title">👴 Senior Citizen (60+ yrs)</span>
+                            <span class="fare-pill-sub">Flat 10% Concession on base fare</span>
+                        </div>
+                    </label>
+
+                    <label class="fare-type-radio">
+                        <input type="radio" name="fare_type" value="Armed Forces">
+                        <div class="fare-type-pill">
+                            <span class="fare-pill-title">🎖️ Armed Forces / Defence</span>
+                            <span class="fare-pill-sub">Up to 15% OFF for military & veterans</span>
+                        </div>
+                    </label>
                 </div>
             </div>
 
             <!-- Search Inputs Grid -->
-            <div class="search-form-grid">
+            <div class="search-form-grid" style="grid-template-columns: 1.3fr 40px 1.3fr 1fr 1fr 0.8fr 1fr;">
                 <!-- Origin -->
                 <div class="form-group">
                     <label class="form-label" for="from_input">From (Departure City)</label>
@@ -66,7 +101,7 @@
 
                 <!-- Departure Date -->
                 <div class="form-group">
-                    <label class="form-label" for="departure_date">Departure Date</label>
+                    <label class="form-label" for="departure_date">Departure</label>
                     <div class="input-wrapper">
                         <span class="input-icon">📅</span>
                         <input type="date" id="departure_date" name="date" class="form-control" required>
@@ -75,26 +110,38 @@
 
                 <!-- Return Date -->
                 <div class="form-group" id="return-date-group" style="opacity: 0.4; pointer-events: none;">
-                    <label class="form-label" for="return_date">Return Date</label>
+                    <label class="form-label" for="return_date">Return</label>
                     <div class="input-wrapper">
                         <span class="input-icon">📅</span>
                         <input type="date" id="return_date" name="return_date" class="form-control">
                     </div>
                 </div>
 
-                <!-- Passengers & Class -->
+                <!-- Passengers Count -->
                 <div class="form-group">
-                    <label class="form-label" for="passengers_select">Travelers & Class</label>
+                    <label class="form-label" for="passengers_select">Travelers</label>
                     <select id="passengers_select" name="passengers" class="form-control form-select">
-                        <option value="1">1 Passenger, Economy</option>
-                        <option value="2">2 Passengers, Economy</option>
-                        <option value="3">3 Passengers, Economy</option>
-                        <option value="4">4 Passengers, Economy</option>
-                        <option value="1_business">1 Passenger, Business</option>
-                        <option value="2_business">2 Passengers, Business</option>
+                        <option value="1">1 Passenger</option>
+                        <option value="2">2 Passengers</option>
+                        <option value="3">3 Passengers</option>
+                        <option value="4">4 Passengers</option>
+                        <option value="5">5 Passengers</option>
+                        <option value="6">6 Passengers</option>
+                    </select>
+                </div>
+
+                <!-- Cabin Class -->
+                <div class="form-group">
+                    <label class="form-label" for="cabin_class_select">Cabin Class</label>
+                    <select id="cabin_class_select" name="cabin_class" class="form-control form-select">
+                        <option value="Economy">Economy</option>
+                        <option value="Premium Economy">Premium Economy</option>
+                        <option value="Business">Business</option>
+                        <option value="First Class">First Class</option>
                     </select>
                 </div>
             </div>
+
 
             <!-- Submit Button & Quick Chips -->
             <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px; flex-wrap: wrap; gap: 16px;">

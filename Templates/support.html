@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}Customer Support & Complaints | SkyWings{% endblock %}
+
+{% block content %}
+<div class="support-wrapper">
+    <div class="support-card">
+
+        <div class="support-header">
+            <span class="badge-pill" style="background: #fee2e2; color: #991b1b; font-weight: 700; margin-bottom: 8px;">
+                CUSTOMER CARE & GRIEVANCES
+            </span>
+            <h1 class="support-title">Submit a Complaint or Inquiry</h1>
+            <p style="color: #64748b; font-size: 0.95rem; margin-top: 6px; line-height: 1.6;">
+                We are committed to resolving your concerns promptly. Emails addressed to <b>support@skywings.com</b>.
+                 <!-- are tracked and forwarded directly to <b>deeptidhanwate0@gmail.com</b>. -->
+            </p>
+        </div>
+
+        <form action="{{ url_for('support') }}" method="POST">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+                <div>
+                    <label class="form-label">Your Full Name</label>
+                    <input type="text" name="name" class="form-control" placeholder="e.g. Rahul Sharma" required style="padding-left: 12px;">
+                </div>
+
+                <div>
+                    <label class="form-label">Your Email Address</label>
+                    <input type="email" name="email" class="form-control" placeholder="e.g. name@example.com" required style="padding-left: 12px;">
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+                <div>
+                    <label class="form-label">Booking Reference (PNR) - Optional</label>
+                    <input type="text" name="pnr" class="form-control" placeholder="e.g. SKY-XYZ123" style="padding-left: 12px; font-family: monospace; text-transform: uppercase;">
+                </div>
+
+                <div>
+                    <label class="form-label">Grievance Category</label>
+                    <select name="category" class="form-control form-select">
+                        <option value="Refund & Cancellation">Refund & Cancellation Dispute</option>
+                        <option value="Flight Delay">Flight Delay or Rescheduling</option>
+                        <option value="Baggage Issue">Baggage Loss or Damage</option>
+                        <option value="Seat / Meal Experience">Seat or Meal Issue</option>
+                        <option value="General Feedback">General Complaint / Feedback</option>
+                    </select>
+                </div>
+            </div>
+
+            <div style="margin-bottom: 16px;">
+                <label class="form-label">Complaint Subject</label>
+                <input type="text" name="subject" class="form-control" placeholder="Brief summary of your grievance" required style="padding-left: 12px;">
+            </div>
+
+            <div style="margin-bottom: 24px;">
+                <label class="form-label">Detailed Description of Issue</label>
+                <textarea name="message" class="form-control" rows="5" placeholder="Please provide all relevant details, date of incident, flight number, and desired resolution..." required style="padding: 12px; font-family: inherit; font-size: 0.95rem;"></textarea>
+            </div>
+
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px; margin-bottom: 20px; font-size: 0.85rem; color: #475569; display: flex; align-items: center; gap: 10px;">
+                <span style="font-size: 1.2rem;">📩</span>
+                <div>
+                    All messages submitted here are officially logged under ticket reference and forwarded directly to <b>deeptidhanwate0@gmail.com</b> for supervisor review.
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-lg" style="width: 100%;">
+                Submit Complaint to Management ➔
+            </button>
+        </form>
+
+    </div>
+</div>
+{% endblock %}

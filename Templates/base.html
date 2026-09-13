@@ -25,6 +25,7 @@
                     <li><a href="{{ url_for('index') }}" class="nav-link {% if request.endpoint == 'index' %}active{% endif %}">Flights</a></li>
                     <li><a href="{{ url_for('deals') }}" class="nav-link {% if request.endpoint == 'deals' %}active{% endif %}">Deals <span class="nav-badge">HOT</span></a></li>
                     <li><a href="{{ url_for('my_bookings') }}" class="nav-link {% if request.endpoint == 'my_bookings' %}active{% endif %}">My Bookings</a></li>
+                    <li><a href="{{ url_for('support') }}" class="nav-link {% if request.endpoint == 'support' %}active{% endif %}">Support & Complaints</a></li>
                 </ul>
             </nav>
 
@@ -88,7 +89,7 @@
                         <li><a href="{{ url_for('index') }}">Search Flights</a></li>
                         <li><a href="{{ url_for('deals') }}">Promo Offers</a></li>
                         <li><a href="{{ url_for('my_bookings') }}">My Bookings & PNR</a></li>
-                        <li><a href="#">Flight Schedule</a></li>
+                        <li><a href="{{ url_for('support') }}">Customer Grievance & Complaints</a></li>
                     </ul>
                 </div>
 
@@ -96,8 +97,10 @@
                     <h4 class="footer-heading">Customer Care</h4>
                     <p style="margin-bottom: 8px;">Toll Free 24/7 Helpline:</p>
                     <p style="font-size: 1.1rem; font-weight: 700; color: white; margin-bottom: 12px;">📞 1800-419-WINGS</p>
-                    <p style="font-size: 0.85rem;">Email: support@skywings.com</p>
+                    <p style="font-size: 0.85rem; margin-bottom: 8px;">Email: support@skywings.com</p>
+                    <p style="font-size: 0.85rem;"><a href="{{ url_for('support') }}" style="color: #60a5fa; font-weight: 600;">Submit Grievance / Complaint ➔</a></p>
                 </div>
+
             </div>
 
             <div class="footer-bottom">

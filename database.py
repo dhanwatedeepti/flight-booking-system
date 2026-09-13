@@ -64,6 +64,7 @@ def init_db():
             passenger_phone TEXT NOT NULL,
             passengers_count INTEGER NOT NULL DEFAULT 1,
             cabin_class TEXT NOT NULL DEFAULT 'Economy',
+            fare_type TEXT NOT NULL DEFAULT 'Regular',
             travel_date TEXT NOT NULL,
             seat_numbers TEXT,
             meal_preferences TEXT,
@@ -75,6 +76,7 @@ def init_db():
             discount REAL DEFAULT 0,
             coupon_code TEXT,
             total_price REAL NOT NULL,
+            refund_amount REAL DEFAULT 0,
             payment_method TEXT DEFAULT 'Credit Card',
             payment_status TEXT DEFAULT 'Pending',
             booking_status TEXT DEFAULT 'Confirmed',
@@ -84,6 +86,16 @@ def init_db():
             FOREIGN KEY (flight_id) REFERENCES flights(id)
         )
     """)
+
+    # Ensure fare_type and refund_amount exist if table was already created
+    try:
+        cursor.execute("ALTER TABLE bookings ADD COLUMN fare_type TEXT DEFAULT 'Regular'")
+    except sqlite3.OperationalError:
+        pass
+    try:
+        cursor.execute("ALTER TABLE bookings ADD COLUMN refund_amount REAL DEFAULT 0")
+    except sqlite3.OperationalError:
+        pass
 
     # Create individual passengers table
     cursor.execute("""
@@ -113,6 +125,20 @@ def init_db():
         )
     """)
 
+    # Create complaints / support inquiries table
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS complaints (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            email TEXT NOT NULL,
+            category TEXT DEFAULT 'General',
+            subject TEXT NOT NULL,
+            message TEXT NOT NULL,
+            forwarded_to TEXT DEFAULT 'deeptidhanwate0@gmail.com',
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+
     conn.commit()
 
     # Check if seed data exists
@@ -124,7 +150,6 @@ def init_db():
     conn.close()
 
 def seed_data(cursor):
-    # Seed airports
     airports = [
         ("DEL", "Delhi", "Indira Gandhi International Airport", "India"),
         ("BOM", "Mumbai", "Chhatrapati Shivaji Maharaj International Airport", "India"),
@@ -143,7 +168,6 @@ def seed_data(cursor):
     ]
     cursor.executemany("INSERT INTO airports VALUES (?, ?, ?, ?)", airports)
 
-    # Seed coupons
     coupons = [
         ("FLYHIGH", 15, 0, 1200, 3000, "15% off up to ₹1,200 on domestic & international flights"),
         ("SKY500", 0, 500, 500, 2500, "Flat ₹500 off on all bookings above ₹2,500"),
@@ -152,7 +176,6 @@ def seed_data(cursor):
     ]
     cursor.executemany("INSERT INTO coupons VALUES (?, ?, ?, ?, ?, ?)", coupons)
 
-    # Seed realistic flights across major routes
     flights_data = [
         # Pune -> Delhi
         ("6E-205", "IndiGo", "6E", "PNQ", "Pune", "DEL", "Delhi", "06:15", "08:25", "2h 10m", 130, 3450, 0, "Non-stop", "Airbus A320neo", "15 kg", "7 kg", 60, 42),
@@ -188,41 +211,14 @@ def seed_data(cursor):
         # Hyderabad -> Chennai
         ("6E-711", "IndiGo", "6E", "HYD", "Hyderabad", "MAA", "Chennai", "07:15", "08:30", "1h 15m", 75, 2750, 0, "Non-stop", "ATR 72-600", "15 kg", "7 kg", 60, 47),
         ("AI-542", "Air India", "AI", "HYD", "Hyderabad", "MAA", "Chennai", "14:40", "15:55", "1h 15m", 75, 3100, 0, "Non-stop", "Airbus A320", "25 kg", "7 kg", 60, 39),
-        ("SG-302", "SpiceJet", "SG", "HYD", "Hyderabad", "MAA", "Chennai", "20:10", "21:30", "1h 20m", 80, 2450, 0, "Non-stop", "Boeing 737-700", "15 kg", "7 kg", 60, 33),
-
-        # Chennai -> Hyderabad
-        ("6E-712", "IndiGo", "6E", "MAA", "Chennai", "HYD", "Hyderabad", "09:15", "10:30", "1h 15m", 75, 2800, 0, "Non-stop", "ATR 72-600", "15 kg", "7 kg", 60, 44),
 
         # Bangalore -> Goa
         ("6E-618", "IndiGo", "6E", "BLR", "Bangalore", "GOI", "Goa", "11:00", "12:15", "1h 15m", 75, 2600, 0, "Non-stop", "Airbus A320neo", "15 kg", "7 kg", 60, 49),
         ("QP-1450", "Akasa Air", "QP", "BLR", "Bangalore", "GOI", "Goa", "16:45", "18:00", "1h 15m", 75, 2350, 0, "Non-stop", "Boeing 737 MAX 8", "15 kg", "7 kg", 60, 55),
 
-        # Goa -> Bangalore
-        ("6E-619", "IndiGo", "6E", "GOI", "Goa", "BLR", "Bangalore", "13:00", "14:15", "1h 15m", 75, 2650, 0, "Non-stop", "Airbus A320neo", "15 kg", "7 kg", 60, 46),
-
-        # Kolkata -> Delhi
-        ("6E-314", "IndiGo", "6E", "CCU", "Kolkata", "DEL", "Delhi", "06:45", "09:05", "2h 20m", 140, 3900, 0, "Non-stop", "Airbus A320neo", "15 kg", "7 kg", 60, 37),
-        ("AI-701", "Air India", "AI", "CCU", "Kolkata", "DEL", "Delhi", "18:30", "20:50", "2h 20m", 140, 4300, 0, "Non-stop", "Airbus A321", "25 kg", "7 kg", 60, 26),
-
-        # Mumbai -> Dubai (International)
+        # Mumbai -> Dubai
         ("EK-501", "Emirates", "EK", "BOM", "Mumbai", "DXB", "Dubai", "04:30", "06:15", "3h 15m", 195, 14200, 0, "Non-stop", "Boeing 777-300ER", "30 kg", "7 kg", 60, 20),
-        ("AI-983", "Air India", "AI", "BOM", "Mumbai", "DXB", "Dubai", "19:00", "20:50", "3h 20m", 200, 11800, 0, "Non-stop", "Boeing 787-8", "30 kg", "7 kg", 60, 28),
-        ("6E-1455", "IndiGo", "6E", "BOM", "Mumbai", "DXB", "Dubai", "22:15", "00:10", "3h 25m", 205, 9900, 0, "Non-stop", "Airbus A321neo", "20 kg", "7 kg", 60, 32),
-
-        # Delhi -> Singapore (International)
-        ("SQ-403", "Singapore Airlines", "SQ", "DEL", "Delhi", "SIN", "Singapore", "09:50", "18:10", "5h 50m", 350, 18500, 0, "Non-stop", "Airbus A380-800", "30 kg", "7 kg", 60, 18),
-        ("AI-382", "Air India", "AI", "DEL", "Delhi", "SIN", "Singapore", "23:05", "07:25", "5h 50m", 350, 15200, 0, "Non-stop", "Boeing 787-8", "25 kg", "7 kg", 60, 24),
-
-        # Delhi -> London Heathrow (International)
-        ("AI-161", "Air India", "AI", "DEL", "Delhi", "LHR", "London", "02:45", "07:30", "9h 15m", 555, 38500, 0, "Non-stop", "Boeing 777-300ER", "35 kg", "7 kg", 60, 15),
-        ("BA-142", "British Airways", "BA", "DEL", "Delhi", "LHR", "London", "10:15", "15:20", "9h 35m", 575, 42000, 0, "Non-stop", "Boeing 787-9", "32 kg", "7 kg", 60, 12),
-
-        # Pune -> Bangalore
-        ("6E-582", "IndiGo", "6E", "PNQ", "Pune", "BLR", "Bangalore", "08:15", "09:40", "1h 25m", 85, 2900, 0, "Non-stop", "Airbus A320neo", "15 kg", "7 kg", 60, 40),
-        ("AI-518", "Air India", "AI", "PNQ", "Pune", "BLR", "Bangalore", "18:30", "19:55", "1h 25m", 85, 3350, 0, "Non-stop", "Airbus A320", "25 kg", "7 kg", 60, 35),
-
-        # Bangalore -> Pune
-        ("6E-583", "IndiGo", "6E", "BLR", "Bangalore", "PNQ", "Pune", "16:10", "17:35", "1h 25m", 85, 2950, 0, "Non-stop", "Airbus A320neo", "15 kg", "7 kg", 60, 42),
+        ("6E-1455", "IndiGo", "6E", "BOM", "Mumbai", "DXB", "Dubai", "22:15", "00:10", "3h 25m", 205, 9900, 0, "Non-stop", "Airbus A321neo", "20 kg", "7 kg", 60, 32)
     ]
 
     cursor.executemany("""
@@ -234,7 +230,6 @@ def seed_data(cursor):
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, flights_data)
 
-# Query functions
 def get_all_airports():
     conn = get_db()
     cursor = conn.cursor()
@@ -284,16 +279,15 @@ def search_flights(origin, destination, max_price=None, airlines=None, stops=Non
         params.append(int(stops))
 
     if time_slot:
-        if time_slot == 'early_morning': # Before 6 AM
+        if time_slot == 'early_morning':
             query += " AND departure_time < '06:00'"
-        elif time_slot == 'morning': # 6 AM to 12 PM
+        elif time_slot == 'morning':
             query += " AND departure_time >= '06:00' AND departure_time < '12:00'"
-        elif time_slot == 'afternoon': # 12 PM to 6 PM
+        elif time_slot == 'afternoon':
             query += " AND departure_time >= '12:00' AND departure_time < '18:00'"
-        elif time_slot == 'evening': # After 6 PM
+        elif time_slot == 'evening':
             query += " AND departure_time >= '18:00'"
 
-    # Sorting
     if sort_by == 'cheapest':
         query += " ORDER BY price ASC"
     elif sort_by == 'fastest':
@@ -341,7 +335,6 @@ def generate_pnr():
         conn.close()
 
 def get_occupied_seats(flight_id, travel_date):
-    """Returns occupied seat numbers for a given flight and travel date."""
     conn = get_db()
     cursor = conn.cursor()
     cursor.execute("""
@@ -359,7 +352,6 @@ def get_occupied_seats(flight_id, travel_date):
                 if s_clean:
                     occupied.add(s_clean)
     
-    # Pre-populate some realistic occupied seats if none booked yet
     if len(occupied) < 10:
         default_occupied = ["1B", "2E", "3C", "4D", "5A", "6F", "7B", "8E", "9A", "10C"]
         for s in default_occupied:
@@ -378,11 +370,11 @@ def create_booking(booking_data, passengers_list):
     cursor.execute("""
         INSERT INTO bookings (
             pnr, flight_id, passenger_name, passenger_email, passenger_phone,
-            passengers_count, cabin_class, travel_date, seat_numbers, meal_preferences,
+            passengers_count, cabin_class, fare_type, travel_date, seat_numbers, meal_preferences,
             add_on_luggage, travel_insurance, base_fare, taxes, add_on_fee,
-            discount, coupon_code, total_price, payment_method, payment_status,
+            discount, coupon_code, total_price, refund_amount, payment_method, payment_status,
             booking_status, terminal, gate
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     """, (
         pnr,
         booking_data['flight_id'],
@@ -391,6 +383,7 @@ def create_booking(booking_data, passengers_list):
         booking_data['passenger_phone'],
         booking_data.get('passengers_count', 1),
         booking_data.get('cabin_class', 'Economy'),
+        booking_data.get('fare_type', 'Regular'),
         booking_data['travel_date'],
         booking_data.get('seat_numbers', ''),
         booking_data.get('meal_preferences', 'Standard Meal'),
@@ -402,6 +395,7 @@ def create_booking(booking_data, passengers_list):
         booking_data.get('discount', 0),
         booking_data.get('coupon_code', ''),
         booking_data['total_price'],
+        0,
         booking_data.get('payment_method', 'Credit Card'),
         'Pending',
         'Confirmed',
@@ -411,7 +405,6 @@ def create_booking(booking_data, passengers_list):
 
     booking_id = cursor.lastrowid
 
-    # Insert individual passengers
     for p in passengers_list:
         cursor.execute("""
             INSERT INTO passengers (
@@ -428,7 +421,6 @@ def create_booking(booking_data, passengers_list):
             p.get('meal', 'Standard Veg')
         ))
 
-    # Reduce available seats on flight
     cursor.execute("""
         UPDATE flights 
         SET available_seats = MAX(0, available_seats - ?) 
@@ -467,14 +459,12 @@ def get_booking_by_pnr(pnr):
         return None
     
     booking = dict(row)
-    # Fetch passengers
     cursor.execute("SELECT * FROM passengers WHERE booking_id = ?", (booking['id'],))
     booking['passengers'] = [dict(p) for p in cursor.fetchall()]
     conn.close()
     return booking
 
 def get_bookings_by_query(query_str):
-    """Find bookings by PNR or Email."""
     conn = get_db()
     cursor = conn.cursor()
     val = query_str.strip().upper()
@@ -502,21 +492,35 @@ def get_bookings_by_query(query_str):
     return results
 
 def cancel_booking(pnr):
+    """Cancels a booking, calculates 85% refund, and returns full booking details."""
     conn = get_db()
     cursor = conn.cursor()
-    cursor.execute("SELECT * FROM bookings WHERE UPPER(pnr) = ?", (pnr.strip().upper(),))
-    booking = cursor.fetchone()
-    if not booking:
+    cursor.execute("""
+        SELECT b.*, f.flight_number, f.airline, f.origin_code, f.origin_city,
+               f.destination_code, f.destination_city, f.departure_time, f.arrival_time
+        FROM bookings b
+        JOIN flights f ON b.flight_id = f.id
+        WHERE UPPER(b.pnr) = ?
+    """, (pnr.strip().upper(),))
+    row = cursor.fetchone()
+    if not row:
         conn.close()
-        return False, "Booking not found."
+        return False, "Booking not found.", 0, None
     
+    booking = dict(row)
     if booking['booking_status'] == 'Cancelled':
         conn.close()
-        return False, "Booking is already cancelled."
+        return False, "Booking is already cancelled.", booking.get('refund_amount', 0), booking
 
-    cursor.execute("UPDATE bookings SET booking_status = 'Cancelled' WHERE pnr = ?", (pnr.strip().upper(),))
+    refund_amount = round(booking['total_price'] * 0.85, 2)
+    booking['refund_amount'] = refund_amount
+
+    cursor.execute("""
+        UPDATE bookings 
+        SET booking_status = 'Cancelled', refund_amount = ? 
+        WHERE pnr = ?
+    """, (refund_amount, pnr.strip().upper()))
     
-    # Restore seat count
     cursor.execute("""
         UPDATE flights 
         SET available_seats = MIN(total_seats, available_seats + ?) 
@@ -526,19 +530,15 @@ def cancel_booking(pnr):
     conn.commit()
     conn.close()
     
-    refund_amount = round(booking['total_price'] * 0.85, 2)
-    return True, f"Booking {pnr} successfully cancelled. Refund of ₹{refund_amount:,.2f} initiated to original payment method."
+    return True, f"Booking {pnr} successfully cancelled. Refund of ₹{refund_amount:,.2f} initiated.", refund_amount, booking
 
-def get_all_recent_bookings():
+def save_complaint(name, email, category, subject, message, forwarded_to="deeptidhanwate0@gmail.com"):
+    """Stores customer complaints/feedback for support@skywings.com."""
     conn = get_db()
     cursor = conn.cursor()
     cursor.execute("""
-        SELECT b.*, f.flight_number, f.airline, f.origin_code, f.origin_city,
-               f.destination_code, f.destination_city, f.departure_time, f.arrival_time
-        FROM bookings b
-        JOIN flights f ON b.flight_id = f.id
-        ORDER BY b.id DESC LIMIT 10
-    """)
-    bookings = [dict(row) for row in cursor.fetchall()]
+        INSERT INTO complaints (name, email, category, subject, message, forwarded_to)
+        VALUES (?, ?, ?, ?, ?, ?)
+    """, (name, email, category, subject, message, forwarded_to))
+    conn.commit()
     conn.close()
-    return bookings

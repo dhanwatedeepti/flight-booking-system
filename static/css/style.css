@@ -1613,3 +1613,134 @@ a:hover {
         border: 2px solid #000;
     }
 }
+
+/* ==========================================================================
+   New Feature Enhancements: Concessions, Payments & Support Styling
+   ========================================================================== */
+
+/* Special Fare Concession Pills */
+.fare-types-container {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin: 14px 0 20px;
+    padding: 12px;
+    background: #f8fafc;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+}
+
+.fare-type-radio {
+    position: relative;
+}
+
+.fare-type-radio input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.fare-type-pill {
+    display: flex;
+    flex-direction: column;
+    padding: 8px 14px;
+    border-radius: var(--radius-md);
+    border: 1.5px solid var(--border);
+    background: white;
+    cursor: pointer;
+    transition: var(--transition);
+    user-select: none;
+}
+
+.fare-type-pill:hover {
+    border-color: var(--primary-light);
+    background: #f0f7ff;
+}
+
+.fare-type-radio input:checked + .fare-type-pill {
+    border-color: var(--primary);
+    background: #eff6ff;
+    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+}
+
+.fare-pill-title {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.fare-pill-sub {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+/* Concession Badges */
+.concession-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 10px;
+    border-radius: var(--radius-full);
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.concession-student {
+    background: #fdf4ff;
+    color: #a21caf;
+    border: 1px solid #f0abfc;
+}
+
+.concession-senior {
+    background: #fffbeb;
+    color: #b45309;
+    border: 1px solid #fde68a;
+}
+
+.concession-defence {
+    background: #ecfdf5;
+    color: #047857;
+    border: 1px solid #a7f3d0;
+}
+
+/* Support & Complaints Page */
+.support-wrapper {
+    max-width: 800px;
+    margin: 40px auto 60px;
+}
+
+.support-card {
+    background: white;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    padding: 32px;
+    box-shadow: var(--shadow-md);
+}
+
+.support-header {
+    text-align: center;
+    margin-bottom: 28px;
+}
+
+.support-title {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: var(--text-main);
+}
+
+.privacy-notice-box {
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    border-radius: 8px;
+    padding: 14px 18px;
+    margin-bottom: 20px;
+    font-size: 0.85rem;
+    color: #1e40af;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
